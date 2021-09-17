@@ -5,5 +5,5 @@ export interface SingletonFactoryInfo {
     transaction: string;
     address: string;
 }
-export declare const getDeployment: (chainId: number) => SingletonFactoryInfo | undefined;
+export declare const getSingletonFactoryInfo: (chainId: number) => SingletonFactoryInfo | undefined;
 //# sourceMappingURL=index.d.ts.map

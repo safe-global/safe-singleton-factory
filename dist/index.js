@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDeployment = void 0;
-const getDeployment = (chainId) => {
+exports.getSingletonFactoryInfo = void 0;
+const getSingletonFactoryInfo = (chainId) => {
     try {
         return require(`../artifacts/${chainId}/deployment.json`);
     }
@@ -9,5 +9,5 @@ const getDeployment = (chainId) => {
         return undefined;
     }
 };
-exports.getDeployment = getDeployment;
+exports.getSingletonFactoryInfo = getSingletonFactoryInfo;
 //# sourceMappingURL=index.js.map
