@@ -6,7 +6,7 @@ export interface SingletonFactoryInfo {
 	address: string
 }
 
-export const getDeployment = (chainId: number): SingletonFactoryInfo | undefined => {
+export const getSingletonFactoryInfo = (chainId: number): SingletonFactoryInfo | undefined => {
   try { 
     return require(`../artifacts/${chainId}/deployment.json`)
   } catch {

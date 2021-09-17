@@ -60,7 +60,7 @@ async function compileContracts(): Promise<CompilerOutput> {
 }
 
 async function writeBytecode(bytecode: string) {
-	const filePath = path.join(__dirname, '..', 'output', `bytecode.txt`)
+	const filePath = path.join(__dirname, '..', 'artifacts', `bytecode.txt`)
 	await filesystem.writeFile(filePath, bytecode, { encoding: 'utf8', flag: 'w' })
 }
 
@@ -82,7 +82,7 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	const signerAddress = await signer.getAddress()
 	const contractAddress = ethers.utils.getContractAddress({ from: signerAddress, nonce } )
 
-	const filePath = path.join(__dirname, "artifacts", `${chainId}`, "deployment.json")
+	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
 	const fileContents = `{
 	"gasPrice": ${gasPrice},
 	"gasLimit": ${gasLimit},
