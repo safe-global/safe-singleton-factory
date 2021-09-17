@@ -1,0 +1,11 @@
+build/
+node_modules/
+.DS_Store
+deployments/
+env/
+.env
+bin/
+solc
+coverage/
+coverage.json
+yarn-error.log
