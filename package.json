@@ -1,5 +1,5 @@
 {
-  "name": "safe-singleton-factory",
+  "name": "@gnosis.pm/safe-singleton-factory",
   "version": "1.0.0",
   "description": "Singleton factory used by Safe related contracts",
   "homepage": "https://github.com/gnosis/safe-singleton-factory/",
@@ -18,7 +18,8 @@
   ],
   "scripts": {
 		"compile": "ts-node scripts/compile.ts",
-    "build": "yarn rimraf dist && tsc"
+    "build": "yarn rimraf dist && tsc",
+    "prepublish": "yarn build"
   },
   "repository": {
     "type": "git",
