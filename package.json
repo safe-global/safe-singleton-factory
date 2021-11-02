@@ -17,7 +17,7 @@
     "README.md"
   ],
   "scripts": {
-		"compile": "ts-node scripts/compile.ts",
+    "compile": "ts-node scripts/compile.ts",
     "build": "yarn rimraf dist && tsc",
     "prepublish": "yarn build"
   },
