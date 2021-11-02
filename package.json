@@ -1,6 +1,6 @@
 {
   "name": "@gnosis.pm/safe-singleton-factory",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Singleton factory used by Safe related contracts",
   "homepage": "https://github.com/gnosis/safe-singleton-factory/",
   "license": "MIT",
