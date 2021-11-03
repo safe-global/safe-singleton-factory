@@ -6,7 +6,7 @@ deployments/
 env/
 .env
 bin/
-solc
+./solc
 coverage/
 coverage.json
 yarn-error.log
