@@ -3,6 +3,7 @@ import * as path from 'path'
 import { CompilerOutput, CompilerInput, compileStandardWrapper, CompilerOutputContract } from 'solc'
 import { ethers } from 'ethers'
 import dotenv from "dotenv";
+import yargs from 'yargs/yargs';
 
 dotenv.config()
 
@@ -64,13 +65,13 @@ async function writeBytecode(bytecode: string) {
 	await filesystem.writeFile(filePath, bytecode, { encoding: 'utf8', flag: 'w' })
 }
 
-async function writeFactoryDeployerTransaction(contract: CompilerOutputContract, chainId: number, overwriteGasPrice?: number) {
+async function writeFactoryDeployerTransaction(contract: CompilerOutputContract, chainId: number, overwrites?: { gasPrice?: number, gasLimit?: number, nonce?: number}) {
 	const deploymentBytecode = contract.evm.bytecode.object
 
-	const nonce = 0
-	const gasPrice = overwriteGasPrice || 100*10**9
+	const nonce = overwrites?.nonce || 0
+	const gasPrice = overwrites?.gasPrice || 100*10**9
 	// actual gas costs last measure: 59159; we don't want to run too close though because gas costs can change in forks and we want our address to be retained
-	const gasLimit = 100000
+	const gasLimit = overwrites?.gasLimit || 100000
 	const value = 0
 	const data = arrayFromHexString(deploymentBytecode)
 
@@ -108,14 +109,18 @@ function arrayFromHexString(value: string): Uint8Array {
 }
 
 async function doStuff() {
-	const gasPrice = process.argv[3] ? parseInt(process.argv[3]) : undefined
 	const chainId: number = parseInt(process.argv[2])
+	const argv = yargs(process.argv.slice(3)).options({
+		"gasPrice": { type: "number" },
+		"gasLimit": { type: "number" },
+		"nonce": { type: "number" }
+	}).argv
 	const compilerOutput = await compileContracts()
 	const contract = compilerOutput.contracts['deterministic-deployment-proxy.yul']['Proxy']
 	await ensureDirectoryExists(path.join(__dirname, '..', 'artifacts'))
 	await ensureDirectoryExists(path.join(__dirname, '..', 'artifacts', `${chainId}`))
 	await writeBytecode(contract.evm.bytecode.object)
-	await writeFactoryDeployerTransaction(contract, chainId, gasPrice)
+	await writeFactoryDeployerTransaction(contract, chainId, argv)
 }
 
 doStuff().then(() => {
