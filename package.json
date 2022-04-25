@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "compile": "ts-node scripts/compile.ts",
+    "estimate": "ts-node scripts/estimate.ts",
     "build": "yarn rimraf dist && tsc",
     "prepublish": "yarn build"
   },
