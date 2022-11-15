@@ -19,6 +19,7 @@
   "scripts": {
     "compile": "ts-node scripts/compile.ts",
     "status": "ts-node scripts/status.ts",
+    "submit": "ts-node scripts/submit.ts",
     "estimate": "ts-node scripts/estimate.ts",
     "build": "yarn rimraf dist && tsc",
     "prepublish": "yarn build"

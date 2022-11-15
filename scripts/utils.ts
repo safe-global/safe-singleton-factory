@@ -45,3 +45,12 @@ export async function compileContracts(): Promise<CompilerOutput> {
 
 	return compilerOutput
 }
+
+export function runScript(script: () => Promise<any>) {
+	script().then(() => {
+		process.exit(0)
+	}).catch(error => {
+		console.error(error)
+		process.exit(1)
+	})
+}

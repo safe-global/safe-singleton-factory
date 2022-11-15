@@ -10,6 +10,9 @@ To add support for new networks the same key used for the existing networks shou
 
 To generate the deployment data for a new network the following steps are necessary:
 
+- Set `RPC` in the `.env` file for the new network
+- Estimate transaction params via `yarn estimate`
+
 - Set `MNEMONIC` in the `.env` file
-- Run `yarn compile <chain_id>`
+- Run `yarn compile <chain_id> [--gasPrice <overwrite_gas_price>] [--gasLimit <overwrite_gas_limit>]`
 

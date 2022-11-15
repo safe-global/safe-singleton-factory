@@ -6,17 +6,15 @@ import { runScript } from './utils';
 
 dotenv.config()
 
-async function checkDeploymentStatus() {
+async function submitDeploymentTransaction() {
 	const rpcUrl = process.env.RPC
 	const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 	const chainId = (await provider.getNetwork()).chainId
 	console.log({chainId})
 	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
-	const deployment = JSON.parse((await filesystem.readFile(filePath)).toString())
-	const address = deployment.address
-	console.log({address})
-	const code = await provider.getCode(address)
-	console.log({code})
+	const deploymentData = JSON.parse(await filesystem.readFile(filePath, { encoding: 'utf8' }))
+	const submittedTx = await provider.sendTransaction(deploymentData.transaction)
+	console.log("Transaction Hash", submittedTx.hash)
 }
 
-runScript(checkDeploymentStatus)
+runScript(submitDeploymentTransaction)
