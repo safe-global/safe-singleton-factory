@@ -1,25 +1,23 @@
-import { promises as filesystem } from 'fs'
-import * as path from 'path'
 import { CompilerOutputContract } from 'solc'
 import { ethers } from 'ethers'
 import dotenv from "dotenv";
 import yargs from 'yargs/yargs';
 import { compileContracts, runScript } from './utils';
 
+const fs = require('fs');
+const path = require('path');
+
 dotenv.config()
 
 export async function ensureDirectoryExists(absoluteDirectoryPath: string) {
-	try {
-		await filesystem.mkdir(absoluteDirectoryPath)
-	} catch (error) {
-		if (error.code === 'EEXIST') return
-		throw error
+	if (!fs.existsSync(absoluteDirectoryPath)){
+		fs.mkdirSync(absoluteDirectoryPath);
 	}
 }
 
 async function writeBytecode(bytecode: string) {
 	const filePath = path.join(__dirname, '..', 'artifacts', `bytecode.txt`)
-	await filesystem.writeFile(filePath, bytecode, { encoding: 'utf8', flag: 'w' })
+	await fs.writeFileSync(filePath, bytecode)
 }
 
 async function writeFactoryDeployerTransaction(contract: CompilerOutputContract, chainId: number, overwrites?: { gasPrice?: number, gasLimit?: number, nonce?: number}) {
@@ -49,7 +47,7 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	"address": "${contractAddress}"
 }
 `
-	await filesystem.writeFile(filePath, fileContents, { encoding: 'utf8', flag: 'w' })
+	await fs.writeFileSync(filePath, fileContents)
 }
 
 function arrayFromHexString(value: string): Uint8Array {
