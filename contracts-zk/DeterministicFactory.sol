@@ -10,12 +10,12 @@ contract DeploymentFactory {
         bytes32 salt,
         bytes32 bytecodeHash,
         bytes calldata input
-    ) external returns (address contractAddress) {
+    ) external payable returns (address contractAddress) {
         (bool success, bytes memory returnData) = SystemContractsCaller
             .systemCallWithReturndata(
                 uint32(gasleft()),
                 address(DEPLOYER_SYSTEM_CONTRACT),
-                uint128(0),
+                uint128(msg.value),
                 abi.encodeCall(
                     DEPLOYER_SYSTEM_CONTRACT.create2,
                     (salt, bytecodeHash, input)
