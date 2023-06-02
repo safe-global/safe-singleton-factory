@@ -35,7 +35,7 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	if (!process.env.MNEMONIC) throw Error("MNEMONIC is required")
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC)
     const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC!!).connect(provider)
-    //if the network supports EIP-1155 transaction, use the EIP-1155 transaction type
+    //if the network supports EIP-1559 transaction, use the EIP-1559 transaction type
     const tx = await signer.populateTransaction({
         nonce, gasPrice, gasLimit, value, data, chainId
     })
