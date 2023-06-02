@@ -33,10 +33,13 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	const data = arrayFromHexString(deploymentBytecode)
 
 	if (!process.env.MNEMONIC) throw Error("MNEMONIC is required")
-	const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC!!)
-	const signedEncodedTransaction = await signer.signTransaction({
-		nonce, gasPrice, gasLimit, value, data, chainId
-	})
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC)
+    const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC!!).connect(provider)
+    //if the network supports EIP-1559 transaction, use the EIP-1559 transaction type
+    const tx = await signer.populateTransaction({
+        nonce, gasPrice, gasLimit, value, data, chainId
+    })
+    const signedEncodedTransaction = await signer.signTransaction(tx)
 	const signerAddress = await signer.getAddress()
 	const contractAddress = ethers.utils.getContractAddress({ from: signerAddress, nonce } )
 
