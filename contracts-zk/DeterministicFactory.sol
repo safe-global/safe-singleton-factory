@@ -6,12 +6,10 @@ import "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContrac
 
 contract DeploymentFactory {
 
-    function deployContract(
-        bytes32 salt,
-        bytes32 bytecodeHash,
-        bytes calldata input
-    ) external payable returns (address contractAddress) {
-        (bool success, bytes memory returnData) = SystemContractsCaller
+    fallback() external payable {
+        // Decode msg.data to the parameters
+        (bytes32 salt, bytes32 bytecodeHash, bytes memory input) = abi.decode(msg.data, (bytes32, bytes32, bytes));
+        (bool success,) = SystemContractsCaller
             .systemCallWithReturndata(
                 uint32(gasleft()),
                 address(DEPLOYER_SYSTEM_CONTRACT),
@@ -22,7 +20,5 @@ contract DeploymentFactory {
                 )
             );
         require(success, "Deployment failed");
-
-        (contractAddress) = abi.decode(returnData, (address));
     }
 }
