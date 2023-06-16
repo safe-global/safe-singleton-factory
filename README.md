@@ -17,6 +17,5 @@ To generate the deployment data for a new network the following steps are necess
 - Run `yarn compile <chain_id> [--gasPrice <overwrite_gas_price>] [--gasLimit <overwrite_gas_limit>]`
 
 # For zkSync
-- Set `RPC` in the `.env` file for the new network
 - Set `MNEMONIC` or `PK` in the `.env` file
 - Run `yarn compile:zk`
