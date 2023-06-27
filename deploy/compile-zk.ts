@@ -32,12 +32,13 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const fromAddress = wallet.address;
 
   const deployer = new Deployer(hre, wallet);
-  const factoryArtifact = await deployer.loadArtifact("DeploymentFactory");
+  const factoryArtifact = await deployer.loadArtifact("SafeSingeltonFactory");
 
   const salt = ethers.constants.HashZero;
   const bytecodeHash = utils.hashBytecode(factoryArtifact.bytecode);
   const input = "0x";
-  const functionSelector = ethers.utils.solidityKeccak256(['string'], ['create(bytes32,bytes32,bytes)']).slice(0, 10);
+  // We use create2 here as the address of this will be zkSync specific in any case. This way it also provides additional security.
+  const functionSelector = ethers.utils.solidityKeccak256(['string'], ['create2(bytes32,bytes32,bytes)']).slice(0, 10);
   const encodedData = new ethers.utils.AbiCoder().encode(
     ['bytes32', 'bytes32', 'bytes'],
     [salt, bytecodeHash, input]
