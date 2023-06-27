@@ -21,11 +21,20 @@ contract SafeSingeltonFactory {
         bytes32 salt = bytes32(msg.data[:32]);
         bytes32 calldataSalt = bytes32(msg.data[36:68]);
         // The factory overrides the salt provided in the deploymentCalldata,
-        // Therefore it is checked that both are the same or 
+        // therefore it is checked that both are the same or 
         // that the salt in the deploymentCalldata was not set (is a zero hash)
         require(calldataSalt == bytes32(0) || calldataSalt == salt, "Unexpected salt");
+        bytes4 methodId = bytes4(msg.data[32:36]);
+        // The factory will only proxy creations that use the create/create2 functions of the system contract.
+        // Both methods have the same signature and allow us to replace the salt and method id without issues.
+        require(
+            methodId == DEPLOYER_SYSTEM_CONTRACT.create2.selector || methodId == DEPLOYER_SYSTEM_CONTRACT.create2.selector, 
+            "Unexpected methodId"
+        );
         // We cut off the method id (4 bytes) and salt (32 bytes) of the deploymentCalldata
         // as we overwrite it with the salt provided to the factory.
+        // This is possible because we replace these with other values of the same size,
+        // therefore the overall payload send to the system contract is still valid and well formed.
         bytes memory truncatedDeploymentCalldata = msg.data[68:];
         (bool success,) = SystemContractsCaller
             .systemCallWithReturndata(
