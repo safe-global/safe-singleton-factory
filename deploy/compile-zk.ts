@@ -1,12 +1,8 @@
 import { utils, Wallet, Provider, EIP712Signer, types } from "zksync-web3";
 import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { CONTRACT_DEPLOYER_ADDRESS } from "zksync-web3/build/src/utils";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import dotenv from "dotenv";
-
-const NONCE_HOLDER_SYSTEM_CONTRACT = "0x0000000000000000000000000000000000008003";
-const NONCE_HOLDER_SYSTEM_CONTRACT_ABI = [ "function getDeploymentNonce(address _address) external view returns (uint256 deploymentNonce)" ];
 
 dotenv.config();
 
@@ -19,8 +15,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
     throw new Error('Missing RPC environment variable');
   }
   const provider = new Provider(RPC);
-  let wallet;
-  //wallet = Wallet.createRandom();
+  let wallet: Wallet;
   if (PK) {
     wallet = new Wallet(PK).connect(provider);
   } else if (MNEMONIC) {
@@ -36,19 +31,20 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
 
   const salt = ethers.constants.HashZero;
   const bytecodeHash = utils.hashBytecode(factoryArtifact.bytecode);
-  const input = "0x";
+  // The singleton factory does not have any constructor
+  const constructor = "0x";
   // We use create2 here as the address of this will be zkSync specific in any case. This way it also provides additional security.
   const iface = new ethers.utils.Interface([
-    'function create2(bytes32 salt, bytes32 bytecodeHash, bytes input)'
+    'function create2(bytes32 salt, bytes32 bytecodeHash, bytes constructor)'
   ]);
-  const data = iface.encodeFunctionData('create2', [salt, bytecodeHash, input]);
+  const data = iface.encodeFunctionData('create2', [salt, bytecodeHash, constructor]);
 
   const chainId = (await provider.getNetwork()).chainId;
   const nonce = await provider.getTransactionCount(fromAddress);
 
   const tempTx = {
     from: fromAddress,
-    to: CONTRACT_DEPLOYER_ADDRESS,
+    to: utils.CONTRACT_DEPLOYER_ADDRESS,
     chainId: chainId,
     nonce: nonce,
     type: 113,
@@ -75,14 +71,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
     customSignature: signature,
   };
   const rawTx = utils.serialize(factoryTx);
-
-  // Getting the deployment nonce to calculate deployed factory address
-  // Normally they should both be equal to 0, used for local testing purposes
-  const nonceHolderContract = new ethers.Contract(NONCE_HOLDER_SYSTEM_CONTRACT, NONCE_HOLDER_SYSTEM_CONTRACT_ABI, wallet);
-  const deploymentNonce = await nonceHolderContract.getDeploymentNonce(fromAddress);
-
-  const contractAddress = utils.createAddress(fromAddress, ethers.BigNumber.from(deploymentNonce));
-  //const contractAddress2 = utils.create2Address(fromAddress, bytecodeHash, salt, input);
+  const contractAddress = utils.create2Address(fromAddress, bytecodeHash, salt, constructor);
 
   const fs = require('fs');
   const path = require('path');

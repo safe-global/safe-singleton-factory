@@ -13,8 +13,9 @@ async function submitDeploymentTransaction() {
 	console.log({chainId})
 	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
 	const deploymentData = JSON.parse(await filesystem.readFile(filePath, { encoding: 'utf8' }))
-	const submittedTx = await provider.sendTransaction(deploymentData.transaction)
-	console.log("Transaction Hash", submittedTx.hash)
+	
+	const submittedTx = await provider.send("eth_sendRawTransaction", [deploymentData.transaction])
+	console.log("Transaction Hash", submittedTx.data)
 }
 
 runScript(submitDeploymentTransaction)

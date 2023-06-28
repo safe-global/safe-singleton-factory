@@ -10,14 +10,14 @@ import "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContrac
  * easily reproduced in a deterministic way. This removed centralization (reliance on a specific deployment key)
  * and improves security (as it is easy to verify deployed code).
  * The factory should follow the same pattern as https://github.com/Arachnid/deterministic-deployment-proxy:
- * - only the `to` of a transaction has to be adjusted
- * - allow to specify a `salt` by prepending it to the deployment data
+ * - `to` of a transaction has to be adjusted to the factory contract address
+ * - `salt` (bytes32) is by prepended to the deployment data
  */
 contract SafeSingeltonFactory {
 
     fallback() external payable {
         // The expected data format is <salt:bytes32><deploymentCalldata:bytes>
-        // Where deploymenCalldata is a call to create/create2 of the DEPLOYER_SYSTEM_CONTRACT contract.
+        // Where deploymentCalldata is the data for the call to the create/create2 of the DEPLOYER_SYSTEM_CONTRACT contract.
         bytes32 salt = bytes32(msg.data[:32]);
         bytes32 calldataSalt = bytes32(msg.data[36:68]);
         // The factory overrides the salt provided in the deploymentCalldata,
@@ -33,7 +33,7 @@ contract SafeSingeltonFactory {
         );
         // We cut off the method id (4 bytes) and salt (32 bytes) of the deploymentCalldata
         // as we overwrite it with the salt provided to the factory.
-        // This is possible because we replace these with other values of the same size,
+        // This is possible because we replace these with other values of the same type and size,
         // therefore the overall payload send to the system contract is still valid and well formed.
         bytes memory truncatedDeploymentCalldata = msg.data[68:];
         (bool success,) = SystemContractsCaller

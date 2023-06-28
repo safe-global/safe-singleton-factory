@@ -19,3 +19,13 @@ To generate the deployment data for a new network the following steps are necess
 # For zkSync
 - Set `MNEMONIC` or `PK` in the `.env` file
 - Run `yarn compile:zk`
+
+# Expected Addresses
+
+For all networks the same deployer key is used. The address for this key is `0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37`.
+
+This results in the address for the factory to be `0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7` for all bytecode compatible EVM networks.
+
+For zkSync based networks the same deployer is used and expected factory address is `0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`.
+
+Note: For zkSync the factory is deployed using the `create2` method of the system deployer.
