@@ -28,7 +28,7 @@ contract SafeSingeltonFactory {
         // The factory will only proxy creations that use the create/create2 functions of the system contract.
         // Both methods have the same signature and allow us to replace the salt and method id without issues.
         require(
-            methodId == DEPLOYER_SYSTEM_CONTRACT.create2.selector || methodId == DEPLOYER_SYSTEM_CONTRACT.create2.selector, 
+            methodId == DEPLOYER_SYSTEM_CONTRACT.create.selector || methodId == DEPLOYER_SYSTEM_CONTRACT.create2.selector, 
             "Unexpected methodId"
         );
         // We cut off the method id (4 bytes) and salt (32 bytes) of the deploymentCalldata
