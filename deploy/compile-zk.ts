@@ -38,12 +38,10 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const bytecodeHash = utils.hashBytecode(factoryArtifact.bytecode);
   const input = "0x";
   // We use create2 here as the address of this will be zkSync specific in any case. This way it also provides additional security.
-  const functionSelector = ethers.utils.solidityKeccak256(['string'], ['create2(bytes32,bytes32,bytes)']).slice(0, 10);
-  const encodedData = new ethers.utils.AbiCoder().encode(
-    ['bytes32', 'bytes32', 'bytes'],
-    [salt, bytecodeHash, input]
-  ).slice(2);
-  const data = functionSelector + encodedData;
+  const iface = new ethers.utils.Interface([
+    'function create2(bytes32 salt, bytes32 bytecodeHash, bytes input)'
+  ]);
+  const data = iface.encodeFunctionData('create2', [salt, bytecodeHash, input]);
 
   const chainId = (await provider.getNetwork()).chainId;
   const nonce = await provider.getTransactionCount(fromAddress);
