@@ -1,8 +1,8 @@
 {
-  "name": "@gnosis.pm/safe-singleton-factory",
+  "name": "@safe-global/safe-singleton-factory",
   "version": "1.0.14",
   "description": "Singleton factory used by Safe related contracts",
-  "homepage": "https://github.com/gnosis/safe-singleton-factory/",
+  "homepage": "https://github.com/safe-global/safe-singleton-factory/",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -26,16 +26,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gnosis/safe-singleton-factory.git"
+    "url": "git+https://github.com/safe-global/safe-singleton-factory.git"
   },
   "keywords": [
     "Ethereum",
     "Hardhat",
     "Safe"
   ],
-  "author": "richard@gnosis.io",
+  "author": "richard@safe.global",
   "bugs": {
-    "url": "https://github.com/rmeissner/hardhat-safe-deployer/issues"
+    "url": "https://github.com/safe-global/safe-singleton-factory/issues"
   },
   "devDependencies": {
     "@types/mocha": "^8.2.0",
