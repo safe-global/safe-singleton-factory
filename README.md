@@ -6,7 +6,7 @@ The original library used a presigned transaction without a chain id to allow de
 
 # Adding new networks
 
-To add support for new networks the same key used for the existing networks should be used to generate a presigned transaction for a new network. To request support for a new network please open a [new issue](https://github.com/gnosis/safe-singleton-factory/issues/new/choose).
+To add support for new networks the same key used for the existing networks should be used to generate a presigned transaction for a new network. To request support for a new network please open a [new issue](https://github.com/safe-global/safe-singleton-factory/issues/new/choose).
 
 To generate the deployment data for a new network the following steps are necessary:
 
