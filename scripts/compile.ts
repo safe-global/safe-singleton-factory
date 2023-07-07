@@ -13,7 +13,7 @@ async function runCreateDeploymentTransaction() {
 		"gasLimit": { type: "number" },
 		"nonce": { type: "number" }
 	}).argv
-	createDeploymentTransaction(chainId, options)
+	await createDeploymentTransaction(chainId, options)
 }
 
 runScript(runCreateDeploymentTransaction)
