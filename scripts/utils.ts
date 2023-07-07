@@ -54,3 +54,12 @@ export function runScript(script: () => Promise<any>) {
 		process.exit(1)
 	})
 }
+
+export function arrayFromHexString(value: string): Uint8Array {
+	const normalized = (value.length % 2) ? `0${value}` : value
+	const bytes: number[] = []
+	for (let i = 0; i < normalized.length; i += 2) {
+		bytes.push(Number.parseInt(`${normalized[i]}${normalized[i+1]}`, 16))
+	}
+	return new Uint8Array(bytes)
+}
