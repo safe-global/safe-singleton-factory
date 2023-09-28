@@ -65,6 +65,7 @@ export async function estimateDeploymentTransaction(rpcUrl: string): Promise<Dep
 	console.log({estimate: gasLimit.toString() })
 	const gasPrice = await provider.getGasPrice()
 	console.log({gasPriceGwei: ethers.utils.formatUnits(gasPrice, "gwei"), gasPrice: gasPrice.toString() })
+	console.log({requiredFunds: ethers.utils.formatUnits(gasPrice.mul(gasLimit), "ether") })
 	return { chainId, gasLimit, gasPrice }
 }
 

@@ -8,6 +8,6 @@ about: Request to add the deployment information for a new network
 - ChainId:
 - RPC http/s address:
 - Link to https://chainlist.org/ 
-- Blockexplorer:
-
-When we provide a PR please deploy the singleton and if possible post an answer on this issue with the links to the blockexplorer addresses.
+- (Optional) Blockexplorer:
+- [] I have run `RPC='http://my-rpc-address' yarn estimate`
+- [] I have sent `requiredFunds` to `0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37`
