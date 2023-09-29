@@ -4,6 +4,8 @@ import { promises as filesystem } from 'fs'
 import { CompilerOutputContract } from 'solc'
 import { arrayFromHexString, compileContracts } from './utils';
 
+const signer = "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37";
+
 export interface DeploymentEstimation {
 	chainId: number
 	gasLimit: ethers.BigNumber
@@ -61,7 +63,7 @@ export async function estimateDeploymentTransaction(rpcUrl: string): Promise<Dep
 	const compilerOutput = await compileContracts()
 	const contract = compilerOutput.contracts['deterministic-deployment-proxy.yul']['Proxy']
 	const data = "0x" + contract.evm.bytecode.object
-	const gasLimit = await provider.estimateGas({ data })
+	const gasLimit = await provider.estimateGas({ data, from: signer })
 	console.log({estimate: gasLimit.toString() })
 	const gasPrice = await provider.getGasPrice()
 	console.log({gasPriceGwei: ethers.utils.formatUnits(gasPrice, "gwei"), gasPrice: gasPrice.toString() })
