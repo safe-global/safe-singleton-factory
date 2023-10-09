@@ -8,7 +8,7 @@ The original library used a presigned transaction without a chain id to allow de
 
 ## How to get the singleton deployed to your network
 
-As the singleton is EIP155 protected, we need to sign the singleton for your network. But some requisites must be met before we do that, the most important one is having funds on the deployer so we can deploy the contract.
+As the singleton is deployed with an EIP155 transaction, we need to sign the deployment transaction for your network. But some prerequisites must be met before that, and the most important one is having funds on the deployer so we can deploy the contract.
 
 - Make sure your network is on https://chainlist.org/ . We will not accept networks not present there.
 - Install dependencies running `yarn`.
