@@ -6,7 +6,7 @@ The original library used a presigned transaction without a chain id to allow de
 
 # User documentation
 
-## How to get singleton deployed for you network
+## How to get the singleton deployed to your network
 
 As the singleton is EIP155 protected, we need to sign the singleton for your network. But some requisites must be met before we do that, the most important one is having funds on the deployer so we can deploy the contract.
 
