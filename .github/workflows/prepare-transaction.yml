@@ -1,0 +1,32 @@
+name: "Validate the issue description and prepare the transaction"
+on:
+  issues:
+    types: [opened, edited]
+env:
+  ISSUE_BODY: ${{ github.event.issue.body }}
+
+jobs:
+  prepareTransaction:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate the issue description
+        run: |
+          # echo $ISSUE_BODY
+          echo $ISSUE_BODY | egrep -o 'https?://[^ ]+' -m 1
+          # echo "{{cat "${{ github.event.issue.body }}" | egrep -o 'https?://[^ ]+'}}"
+
+      - name: Check the chain in chainlists
+        run: |
+          # Check the chain in chainlists
+          # If the chain is not in chainlists, exit with a non-zero code
+          # and post a comment to the issue asking to add the chain to chainlists
+          # and the workflow will stop here
+          # Otherwise, the workflow will continue to the next step
+          exit 1
+
+      - name: Prepare the transaction and post a comment to the issue
+        run: |
+          # Prepare the transaction
+          # Post a comment to the issue with the transaction
+          # and the workflow will stop here
+          exit 1
