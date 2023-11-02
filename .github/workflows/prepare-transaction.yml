@@ -4,29 +4,204 @@ on:
     types: [opened, edited]
 env:
   ISSUE_BODY: ${{ github.event.issue.body }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NUMBER: ${{ github.event.issue.number }}
+  REPO: ${{ github.repository }}
+  FACTORY_ADDRESS: "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
+  FACTORY_BYTECODE: "0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3"
+  FACTORY_DEPLOYER_ADDRESS: "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37"
+  ERROR_MSG_RPC_FAILURE: >
+    **⛔️ Error:**<br>
+    Could not fetch the chain ID from the RPC URL.<br>
+    Either the RPC URL is missing, or the RPC is not responding.<br>
+    **Make sure your issue follows the issue template and includes the RPC URL.**<br>
+    :sparkles: You can edit the issue to trigger the check again. :sparkles:
+  ERROR_MSG_CHAINLIST_FAILURE: >
+    **⛔️ Error:**<br>
+    Couldn't find the chain in the chainlist. Please make sure it's added to the chainlist.<br>
+    For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>
+    :sparkles: You can edit the issue to trigger the check again. :sparkles:
+  ERROR_MSG_PREFUND_CHECK: >
+    **⛔️ Error:**<br>
+    There was an error while estimating the deployment transaction and checking the pre-fund. Please make sure that the RPC URL is valid and reachable.<br>
+    :sparkles: You can edit the issue to trigger the check again. :sparkles:
+  SUCCESS_MSG: >
+    **✅ Success:**<br>
+    The issue description is valid:<br>
+    - The RPC URL is valid<br>
+    - The chain is in the chainlist<br>
+    - The deployer address is pre-funded<br>
+    :sparkles: The team will be in touch with you soon :sparkles:
 
 jobs:
   prepareTransaction:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate the issue description
+      - name: Validate the issue description and get the RPC URL
+        id: validate_description
         run: |
-          # echo $ISSUE_BODY
-          echo $ISSUE_BODY | egrep -o 'https?://[^ ]+' -m 1
-          # echo "{{cat "${{ github.event.issue.body }}" | egrep -o 'https?://[^ ]+'}}"
+          trim() {
+              # 3.5.3 Shell Parameter Expansion at https://www.gnu.org/software/bash/manual/bash.html
+              local var="$*"
+              # remove leading whitespace characters
+              var="${var#"${var%%[![:space:]]*}"}"
+              # remove trailing whitespace characters
+              var="${var%"${var##*[![:space:]]}"}"
+              echo "$var"
+          }
 
-      - name: Check the chain in chainlists
-        run: |
-          # Check the chain in chainlists
-          # If the chain is not in chainlists, exit with a non-zero code
-          # and post a comment to the issue asking to add the chain to chainlists
-          # and the workflow will stop here
-          # Otherwise, the workflow will continue to the next step
-          exit 1
+          rpc_url=$(echo $ISSUE_BODY | egrep -o 'https?://[^ ]+' -m 1 | head -1)
 
-      - name: Prepare the transaction and post a comment to the issue
+          if [ -z "$rpc_url" ]; then
+            echo "COMMENT_OUTPUT=\"$ERROR_MSG_RPC_FAILURE\"" >> $GITHUB_ENV
+            exit 1
+          fi
+
+          rpc_url="$(trim $rpc_url)"
+          echo "Extracted RPC url: $rpc_url. Trying to get the chain id..."
+          response=$(curl $rpc_url --location --header \
+            'Content-Type: application/json' --data '{
+                          "jsonrpc": "2.0",
+                          "method": "eth_chainId",
+                          "params": [],
+                          "id": 5413
+                      }')
+
+          if jq -e . >/dev/null 2>&1 <<< "$response"; then
+              chain_id=$(echo "$response" | jq -r '.result')
+              chain_id=${chain_id#0x}
+              chain_id=$((16#$chain_id))
+              echo "chain_id=$chain_id" >> $GITHUB_OUTPUT
+              echo "rpc_url=$rpc_url" >> $GITHUB_OUTPUT
+          else
+              echo "Failed to parse JSON, or got false/null"
+              echo "COMMENT_OUTPUT=\"$ERROR_MSG_RPC_FAILURE\"" >> $GITHUB_ENV
+              exit 1
+          fi
+
+      - name: Check if the factory already deployed
+        if: success() && ${{ steps.validate_description.outputs.rpc_url != null }}
+        env:
+          RPC_URL: ${{ steps.validate_description.outputs.rpc_url }}
         run: |
-          # Prepare the transaction
-          # Post a comment to the issue with the transaction
-          # and the workflow will stop here
-          exit 1
+          factory_code=$(curl $RPC_URL --location --header \
+            'Content-Type: application/json' --data '{
+                          "jsonrpc": "2.0",
+                          "method": "eth_getCode",
+                          "params": ["'$FACTORY_ADDRESS'", "latest"],
+                          "id": 5413
+                      }')
+
+          if jq -e . >/dev/null 2>&1 <<< "$factory_code"; then
+            factory_code=$(jq -r '.result' <<< "$factory_code")
+
+            if [ "$factory_code" != "0x" ]; then
+              echo "COMMENT_OUTPUT=\"**⛔️ Error:**<br/>The factory is already deployed. Please use the existing factory at $FACTORY_ADDRESS.\"" >> $GITHUB_ENV
+              exit 1
+            fi
+          fi
+
+      - name: Check the chain in chainlist
+        if: success() && ${{ steps.validate_description.outputs.chain_id != null }}
+        env:
+          CHAIN_ID: ${{ steps.validate_description.outputs.chain_id }}
+        run: |
+          trim() {
+              # 3.5.3 Shell Parameter Expansion at https://www.gnu.org/software/bash/manual/bash.html
+              local var="$*"
+              # remove leading whitespace characters
+              var="${var#"${var%%[![:space:]]*}"}"
+              # remove trailing whitespace characters
+              var="${var%"${var##*[![:space:]]}"}"
+              echo "$var"
+          }
+
+          echo "$CHAIN_ID from the RPC URL is valid. Checking the chain in chainlist..."
+          chainlist_url="https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/chains/eip155-$CHAIN_ID.json"
+
+          chainlist_status_code=$(trim "$(curl -LI $chainlist_url -o /dev/null -w '%{http_code}\n' -s)")
+
+          if [ "$chainlist_status_code" == "404" ]; then
+            echo "Chain $CHAIN_ID is not in chainlist."
+            echo "COMMENT_OUTPUT=\"$ERROR_MSG_CHAINLIST_FAILURE\"" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Estimate Transaction and Check Pre-fund
+        if: success() && ${{ steps.validate_description.outputs.rpc_url != null }}
+        env:
+          RPC_URL: ${{ steps.validate_description.outputs.rpc_url }}
+        run: |
+          json_request='[
+              {
+                  "jsonrpc": "2.0",
+                  "method": "eth_gasPrice",
+                  "params": [],
+                  "id": 1
+              },
+              {
+                  "jsonrpc": "2.0",
+                  "method": "eth_estimateGas",
+                  "params": [
+                      {
+                          "from": "'$FACTORY_DEPLOYER_ADDRESS'",
+                          "data": "'$FACTORY_BYTECODE'"
+                      }
+                  ],
+                  "id": 2
+              }
+          ]'
+
+          response=$(curl "$RPC_URL" --location --header 'Content-Type: application/json' --data "$json_request")
+
+          if jq -e . >/dev/null 2>&1 <<< "$response"; then
+            gas_price=$(jq -r '.[0].result' <<< "$response")
+            echo "Current gas price: $gas_price"
+            gas_limit=$(jq -r '.[1].result' <<< "$response")
+            echo "Estimated deployment gas limit: $gas_limit"
+
+            if [[ "$gas_price" == "null" || "$gas_limit" == "null" ]]; then
+              echo "COMMENT_OUTPUT=\"$ERROR_MSG_PREFUND_CHECK\"" >> $GITHUB_ENV
+              exit 1
+            fi
+
+            # We multiply the gas limit by 1.4, just like the deployment script does it
+            gas_limit=$(( $gas_limit * 14 / 10 ))
+            expected_prefund=$(($gas_limit * $gas_price))
+
+            echo "Expected pre-fund: $expected_prefund"
+
+            deployer_address_balance=$(curl $RPC_URL --location --header \
+            'Content-Type: application/json' --data '{
+                          "jsonrpc": "2.0",
+                          "method": "eth_getBalance",
+                          "params": ["'$FACTORY_DEPLOYER_ADDRESS'", "latest"],
+                          "id": 5413
+                      }')
+
+            if jq -e . >/dev/null 2>&1 <<< "$deployer_address_balance"; then
+              deployer_address_balance=$(jq -r '.result' <<< "$deployer_address_balance")
+              deployer_address_balance=${deployer_address_balance#0x}
+              deployer_address_balance=$((16#$deployer_address_balance))
+              echo "Deployer address balance: $deployer_address_balance"
+
+              if [ "$deployer_address_balance" -lt "$expected_prefund" ]; then
+                echo "COMMENT_OUTPUT=\"**⛔️ Error:**<br/>The deployer address is not pre-funded. Please send $expected_prefund wei to $FACTORY_DEPLOYER_ADDRESS and try again.\"" >> $GITHUB_ENV
+                exit 1
+              fi
+            else
+              echo "COMMENT_OUTPUT=\"$ERROR_MSG_PREFUND_CHECK\"" >> $GITHUB_ENV 
+              exit 1
+            fi
+          else
+            echo "COMMENT_OUTPUT=\"$ERROR_MSG_PREFUND_CHECK\"" >> $GITHUB_ENV
+            exit 1
+          fi
+
+          echo "COMMENT_OUTPUT=\"$SUCCESS_MSG\"" >> $GITHUB_ENV
+      - name: Post Comment to the Issue
+        if: always()
+        env:
+          COMMENT_OUTPUT: ${{ env.COMMENT_OUTPUT }}
+        run: |
+          gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT" --edit-last || gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT"
