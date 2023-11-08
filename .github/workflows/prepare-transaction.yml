@@ -89,7 +89,7 @@ jobs:
                           "jsonrpc": "2.0",
                           "method": "eth_getCode",
                           "params": ["'$FACTORY_ADDRESS'", "latest"],
-                          "id": 5413
+                          "id": "0x5afe"
                       }')
 
           if jq -e . >/dev/null 2>&1 <<< "$factory_code"; then
