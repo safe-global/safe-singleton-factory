@@ -44,7 +44,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Run the validation script
-        run: . ./github/scripts/validate_new_chain_request.sh
+        run: . ./.github/scripts/validate_new_chain_request.sh
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
