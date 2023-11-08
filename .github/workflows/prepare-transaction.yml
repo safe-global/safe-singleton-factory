@@ -10,28 +10,6 @@ env:
   FACTORY_ADDRESS: "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
   FACTORY_BYTECODE: "0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3"
   FACTORY_DEPLOYER_ADDRESS: "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37"
-  ERROR_MSG_RPC_FAILURE: >
-    **⛔️ Error:**<br>
-    Could not fetch the chain ID from the RPC URL.<br>
-    Either the RPC URL is missing, or the RPC is not responding.<br>
-    **Make sure your issue follows the issue template and includes the RPC URL.**<br>
-    :sparkles: You can edit the issue to trigger the check again. :sparkles:
-  ERROR_MSG_CHAINLIST_FAILURE: >
-    **⛔️ Error:**<br>
-    Couldn't find the chain in the chainlist. Please make sure it's added to the chainlist.<br>
-    For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>
-    :sparkles: You can edit the issue to trigger the check again. :sparkles:
-  ERROR_MSG_PREFUND_CHECK: >
-    **⛔️ Error:**<br>
-    There was an error while estimating the deployment transaction and checking the pre-fund. Please make sure that the RPC URL is valid and reachable.<br>
-    :sparkles: You can edit the issue to trigger the check again. :sparkles:
-  SUCCESS_MSG: >
-    **✅ Success:**<br>
-    The issue description is valid:<br>
-    - The RPC URL is valid<br>
-    - The chain is in the chainlist<br>
-    - The deployer address is pre-funded<br>
-    :sparkles: The team will be in touch with you soon :sparkles:
 
 jobs:
   prepareTransaction:
@@ -40,23 +18,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            ./.github/scripts/validate_new_chain_request.sh
+            .github/scripts/validate_new_chain_request.sh
           sparse-checkout-cone-mode: false
 
       - name: Run the validation script
         run: . ./.github/scripts/validate_new_chain_request.sh
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NUMBER: ${{ env.NUMBER }}
-          REPO: ${{ env.REPO }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
           FACTORY_BYTECODE: ${{ env.FACTORY_BYTECODE }}
           FACTORY_DEPLOYER_ADDRESS: ${{ env.FACTORY_DEPLOYER_ADDRESS }}
-          ERROR_MSG_RPC_FAILURE: ${{ env.ERROR_MSG_RPC_FAILURE }}
-          ERROR_MSG_CHAINLIST_FAILURE: ${{ env.ERROR_MSG_CHAINLIST_FAILURE }}
-          ERROR_MSG_PREFUND_CHECK: ${{ env.ERROR_MSG_PREFUND_CHECK }}
-          SUCCESS_MSG: ${{ env.SUCCESS_MSG }}
 
       - name: Post Comment to the Issue
         if: always()
