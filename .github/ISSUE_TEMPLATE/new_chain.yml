@@ -1,0 +1,45 @@
+name: Request factory deployment to a new chain
+description: Template to request a factory deployment to a new chain
+title: "[New chain]: "
+body:
+  - type: markdown
+    attributes:
+      value: Please fill the following form
+  - type: input
+    id: name
+    attributes:
+      label: Chain Name
+      description: Chain Name
+    validations:
+      required: true
+  - type: input
+    id: rpc_url
+    attributes:
+      label: RPC URL
+      description: RPC URL
+    validations:
+      required: true
+  - type: checkboxes
+    id: chainlist_url
+    attributes:
+      label: The chain must be added to https://chainlist.org/
+      options:
+        - label: I confirm that the chain is added to chainlist
+          required: true
+  - type: checkboxes
+    id: prefunded
+    attributes:
+      label: After creating the issue, a bot will estimate the required pre-fund and post it in the comments. Please check this checkbox after you send the pre-fund.
+      options:
+        - label: I sent the pre-fund in accordance with Github Action's comment
+  - type: textarea
+    id: relevant
+    attributes:
+      label: Relevant information
+      description: Add relevant information like blockexplorer, any annotation
+  - type: markdown
+    attributes:
+      value: |
+        Please keep one network per issue. If you need to request a factory deployment to multiple networks, please create one issue per network.<br/>
+        After creating the issue, a GitHub Action will validate the issue description and post a comment with the result. If the validation passes, it will calculate the required prefund <br/>
+        and check if the deployer address is pre-funded. If the deployer address is not pre-funded, the comment will contain the required prefund and the deployer address.<br/>
