@@ -46,7 +46,7 @@ SUCCESS_MSG=\
 "- The deployer address is pre-funded<br>"\
 ":sparkles: The team will be in touch with you soon :sparkles:"
 ADDRESS_NOT_PREFUNDED_ERR_MSG() {
-    echo "**⛔️ Error:**<br/>The deployer address is not pre-funded. Please send $1 wei to $FACTORY_DEPLOYER_ADDRESS and try again."
+    echo "**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send $1 wei to $FACTORY_DEPLOYER_ADDRESS and check the checkbox in the issue."
 }
 FACTORY_ALREADY_DEPLOYED_ERR_MSG="**⛔️ Error:**<br/>The factory is already deployed. Please use the existing factory at $FACTORY_ADDRESS."
 
