@@ -1,6 +1,6 @@
 ---
 title: Biweekly release of the new npm package
-assignees: "safe-global/safe-protocol"
+assignees: mmv08,nlordell,rmeissner,akshay-ap,remedcu
 ---
 
 It's time to release the new version to NPM. Before releasing, please:
