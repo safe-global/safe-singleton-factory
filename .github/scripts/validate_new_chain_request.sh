@@ -99,7 +99,7 @@ factory_code=$(curl "$rpc_url" --location --header \
 if jq -e . >/dev/null 2>&1 <<< "$factory_code"; then
   factory_code=$(jq -r '.result' <<< "$factory_code")
 
-  if [ "$factory_code" != "0x" ]; then
+  if [ "$factory_code" != "0x" ] && [ "$factory_code" != "" ]; then
     echo "COMMENT_OUTPUT=$FACTORY_ALREADY_DEPLOYED_ERR_MSG" >> $GITHUB_ENV
     exit 1
   fi
