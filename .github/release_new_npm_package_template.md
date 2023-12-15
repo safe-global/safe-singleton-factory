@@ -1,6 +1,6 @@
 ---
 title: Biweekly release of the new npm package
-assignees: mmv08,nlordell,rmeissner,akshay-ap,remedcu
+assignees: mmv08
 ---
 
 It's time to release the new version to NPM. Before releasing, please:
