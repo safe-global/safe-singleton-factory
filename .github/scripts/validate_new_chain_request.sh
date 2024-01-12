@@ -152,6 +152,10 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
   # We multiply the gas limit by 1.4, just like the deployment script does it
   gas_limit=$(( gas_limit * 14 / 10 ))
   expected_prefund=$((gas_limit * gas_price))
+  if [ "$chain_id" == "10242" ]; then
+    echo "Chain $chain_id does not need pre-fund but subscription ."
+    expected_prefund=0
+  fi
 
   echo "Expected pre-fund: $expected_prefund"
 
