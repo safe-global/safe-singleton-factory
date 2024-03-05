@@ -27,7 +27,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const fromAddress = wallet.address;
 
   const deployer = new Deployer(hre, wallet);
-  const factoryArtifact = await deployer.loadArtifact("SafeSingeltonFactory");
+  const factoryArtifact = await deployer.loadArtifact("SafeSingletonFactory");
 
   const salt = ethers.constants.HashZero;
   const bytecodeHash = utils.hashBytecode(factoryArtifact.bytecode);
