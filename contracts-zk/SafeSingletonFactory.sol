@@ -13,7 +13,7 @@ import "@matterlabs/zksync-contracts/l2/system-contracts/libraries/SystemContrac
  * - `to` of a transaction has to be adjusted to the factory contract address
  * - `salt` (bytes32) is by prepended to the deployment data
  */
-contract SafeSingeltonFactory {
+contract SafeSingletonFactory {
 
     fallback() external payable {
         // The expected data format is <salt:bytes32><deploymentCalldata:bytes>
