@@ -9,8 +9,8 @@ async function runEstimateAndCompile() {
 	if (rpcUrl === undefined) throw "RPC environment variable must be defined"
     const deploymentEstimation: DeploymentEstimation = await estimateDeploymentTransaction(rpcUrl)
     const options = {
-        gasPrice: deploymentEstimation.gasPrice.toNumber(),
-        gasLimit: Math.round(deploymentEstimation.gasLimit.toNumber() * 1.4),
+        gasPrice: deploymentEstimation.gasPrice,
+        gasLimit: BigInt(deploymentEstimation.gasLimit) * 14n / 10n,
         nonce: 0
     }
     await createDeploymentTransaction(deploymentEstimation.chainId, options)
