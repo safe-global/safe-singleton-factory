@@ -8,7 +8,7 @@ dotenv.config()
 
 async function checkDeploymentStatus() {
 	const rpcUrl = process.env.RPC
-	const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+	const provider = new ethers.JsonRpcProvider(rpcUrl)
 	const chainId = (await provider.getNetwork()).chainId
 	console.log({chainId})
 	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
