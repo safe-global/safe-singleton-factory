@@ -1,6 +1,6 @@
 {
   "name": "@safe-global/safe-singleton-factory",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "Singleton factory used by Safe related contracts",
   "homepage": "https://github.com/safe-global/safe-singleton-factory/",
   "license": "MIT",
