@@ -1,5 +1,5 @@
 import { utils, Wallet, Provider, EIP712Signer, types } from "zksync-web3";
-import * as ethers from "ethers";
+import * as ethers from "ethers-v5";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import dotenv from "dotenv";
@@ -83,11 +83,11 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }
-  fs.writeFileSync(path.join(dir, "deployment.json"), JSON.stringify({ 
-    gasPrice: factoryTx.gasPrice.toNumber(), 
-    gasLimit: factoryTx.gasLimit.toNumber(), 
-    signerAddress: factoryTx.from, 
-    transaction: rawTx, 
+  fs.writeFileSync(path.join(dir, "deployment.json"), JSON.stringify({
+    gasPrice: factoryTx.gasPrice.toNumber(),
+    gasLimit: factoryTx.gasLimit.toNumber(),
+    signerAddress: factoryTx.from,
+    transaction: rawTx,
     address: contractAddress
   }, null, 4));
 }

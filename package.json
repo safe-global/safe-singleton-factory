@@ -40,8 +40,8 @@
     "url": "https://github.com/safe-global/safe-singleton-factory/issues"
   },
   "devDependencies": {
-    "@matterlabs/hardhat-zksync-deploy": "^1.2.1",
-    "@matterlabs/hardhat-zksync-solc": "^1.1.4",
+    "@matterlabs/hardhat-zksync-deploy": "^0.6.1",
+    "@matterlabs/hardhat-zksync-solc": "^0.3.16",
     "@matterlabs/zksync-contracts": "^0.6.1",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.30",
@@ -50,10 +50,12 @@
     "axios": "^1.6.8",
     "dotenv": "^16.4.5",
     "ethers": "^6.11.1",
+    "ethers-v5": "npm:ethers@5.7.2",
     "hardhat": "^2.22.2",
     "solc": "0.5.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "zksync-web3": "^0.14.3"
   }
 }
