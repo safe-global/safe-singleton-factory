@@ -16,6 +16,14 @@ Between the use of CREATE2 opcode and the one-time-use account for the deployer,
 
 The data should be the 32 byte 'salt' followed by the init code.
 
+## How to use for your projects
+
+While the Safe singleton factory contract was deployed to help ensure that various Safe contracts have consistent addresses across many networks, it can be used in any project as an alternative to the [Arachnid `CREATE2` deployer contract](https://github.com/Arachnid/deterministic-deployment-proxy).
+
+### Usage with Foundry
+
+[`wilsoncusack/safe-singleton-deployer-sol`](https://github.com/wilsoncusack/safe-singleton-deployer-sol) is a library that facilitates the use of the Safe singleton factory contract for [Foundry](https://github.com/foundry-rs/foundry) projects. See the project for more detailed documentation.
+
 ## How to get the singleton deployed to your network
 
 As the singleton is deployed with an EIP155 transaction, we must sign the deployment transaction for your network. But some prerequisites must be met before that, and the most important one is having funds on the deployer so we can deploy the contract.
