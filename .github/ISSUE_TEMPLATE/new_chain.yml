@@ -1,6 +1,7 @@
 name: Request factory deployment to a new chain
 description: Template to request a factory deployment to a new chain
 title: "[New chain]: "
+labels: ["new-chain"]
 body:
   - type: markdown
     attributes:

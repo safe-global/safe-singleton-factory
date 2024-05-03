@@ -13,6 +13,7 @@ env:
 
 jobs:
   prepareTransaction:
+    if: ${{ contains(github.event.issue.labels.*.name, 'new-chain') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,3 +36,13 @@ jobs:
           COMMENT_OUTPUT: ${{ env.COMMENT_OUTPUT }}
         run: |
           gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT" --edit-last || gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT"
+          gh issue edit "$NUMBER" --repo "$REPO" "$LABEL_OPERATION" ready-to-deploy
+
+  # Workflows where all jobs are skipped are counted as "failed". In order to
+  # work around this, always execute a dummy job regardless of whether or not
+  # the `new-chain` tag is set.
+  alwaysExecuted:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "always executed"
