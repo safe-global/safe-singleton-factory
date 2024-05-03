@@ -61,11 +61,17 @@ trim() {
     echo "$var"
 }
 
+report_error() {
+    echo "COMMENT_OUTPUT=$1" >> $GITHUB_ENV
+    echo "LABEL_OPERATION=--remove-label" >> $GITHUB_ENV
+    exit 1
+}
+
 rpc_url=$(echo "$ISSUE_BODY" | egrep -o 'https?://[^ ]+' -m 1 | head -1)
 
 if [ -z "$rpc_url" ]; then
-    echo "COMMENT_OUTPUT=$ERROR_MSG_RPC_FAILURE" >> $GITHUB_ENV
-    exit 1
+    echo "Failed to parse RPC URL from issue body"
+    report_error "$ERROR_MSG_RPC_FAILURE"
 fi
 
 rpc_url="$(trim "$rpc_url")"
@@ -83,8 +89,7 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
   chain_id=$(( $(echo "$response" | jq -r '.result') ))
 else
     echo "Failed to parse JSON, or got false/null"
-    echo "COMMENT_OUTPUT=$ERROR_MSG_RPC_FAILURE" >> $GITHUB_ENV
-    exit 1
+    report_error "$ERROR_MSG_RPC_FAILURE"
 fi
 
 
@@ -100,8 +105,7 @@ if jq -e . >/dev/null 2>&1 <<< "$factory_code"; then
   factory_code=$(jq -r '.result' <<< "$factory_code")
 
   if [ "$factory_code" != "0x" ] && [ "$factory_code" != "" ]; then
-    echo "COMMENT_OUTPUT=$FACTORY_ALREADY_DEPLOYED_ERR_MSG" >> $GITHUB_ENV
-    exit 1
+    report_error "$FACTORY_ALREADY_DEPLOYED_ERR_MSG"
   fi
 fi
 
@@ -112,8 +116,7 @@ chainlist_status_code=$(trim "$(curl -LI "$chainlist_url" -o /dev/null -w '%{htt
 
 if [ "$chainlist_status_code" == "404" ]; then
   echo "Chain $chain_id is not in chainlist."
-  echo "COMMENT_OUTPUT=$ERROR_MSG_CHAINLIST_FAILURE" >> $GITHUB_ENV
-  exit 1
+  report_error "$ERROR_MSG_CHAINLIST_FAILURE"
 fi
 
 json_request='[
@@ -145,8 +148,7 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
   echo "Estimated deployment gas limit: $gas_limit"
 
   if [[ "$gas_price" == "null" || "$gas_limit" == "null" ]]; then
-    echo "COMMENT_OUTPUT=$ERROR_MSG_PREFUND_CHECK" >> $GITHUB_ENV
-    exit 1
+    report_error "$ERROR_MSG_PREFUND_CHECK"
   fi
 
   # We multiply the gas limit by 1.4, just like the deployment script does it
@@ -168,16 +170,14 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
     echo "Deployer address balance: $deployer_address_balance"
 
     if [ "$deployer_address_balance" -lt "$expected_prefund" ]; then
-      echo "COMMENT_OUTPUT=$(ADDRESS_NOT_PREFUNDED_ERR_MSG $expected_prefund)" >> $GITHUB_ENV
-      exit 1
+      report_error "$(ADDRESS_NOT_PREFUNDED_ERR_MSG $expected_prefund)"
     fi
   else
-    echo "COMMENT_OUTPUT=$ERROR_MSG_PREFUND_CHECK" >> $GITHUB_ENV
-    exit 1
+    report_error "$ERROR_MSG_PREFUND_CHECK"
   fi
 else
-  echo "COMMENT_OUTPUT=$ERROR_MSG_PREFUND_CHECK" >> $GITHUB_ENV
-  exit 1
+  report_error "$ERROR_MSG_PREFUND_CHECK"
 fi
 
 echo "COMMENT_OUTPUT=$SUCCESS_MSG" >> $GITHUB_ENV
+echo "LABEL_OPERATION=--add-label" >> $GITHUB_ENV
