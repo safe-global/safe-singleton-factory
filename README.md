@@ -55,7 +55,19 @@ For example, see the [documentation](https://github.com/wighawag/hardhat-deploy/
 
 ## Adding new networks
 
-To generate the deployment data for a new network, the following steps are necessary:
+### Using the `github-deploy` Tool
+
+This repository contains a bash script [`bin/github-deploy.sh`](./bin/github-deploy.sh) for automatically deploying the Safe singleton factory for a given GitHub issue `$NUMBER`:
+
+- Install [`gh` GitHub CLI tool](https://cli.github.com/)
+- Install [`op` 1Password CLI tool](https://1password.com/downloads/command-line/)
+- Run `bash bin/github-deploy.sh $NUMBER`
+
+**Note that this utility does not currently support zkSync-based network deployments**.
+
+### Manual Process
+
+Optionally, deployment may be done by manual configuration and execution of NPM scripts. To generate the deployment data for a new network, the following steps are necessary:
 
 - Set `RPC` in the `.env` file for the new network.
 - Set `MNEMONIC` in the `.env` file.
@@ -70,7 +82,8 @@ To submit a transaction after the deployment data is created:
 
 - Run `yarn submit`
 
-## For zkSync-based networks
+#### For zkSync-based networks
 
-- Set `MNEMONIC` or `PK` in the `.env` file
+Use the same steps as above, but instead compile with:
+
 - Run `yarn compile:zk`
