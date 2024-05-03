@@ -76,7 +76,7 @@ fi
 
 rpc_url="$(trim "$rpc_url")"
 echo "Extracted RPC url: $rpc_url. Trying to get the chain id..."
-response=$(curl "$rpc_url" --location --header \
+response=$(curl -s "$rpc_url" --location --header \
     'Content-Type: application/json' --data '{
                           "jsonrpc": "2.0",
                           "method": "eth_chainId",
@@ -93,7 +93,7 @@ else
 fi
 
 
-factory_code=$(curl "$rpc_url" --location --header \
+factory_code=$(curl -s "$rpc_url" --location --header \
   'Content-Type: application/json' --data '{
                 "jsonrpc": "2.0",
                 "method": "eth_getCode",
@@ -112,7 +112,7 @@ fi
 echo "$chain_id from the RPC URL is valid. Checking the chain in chainlist..."
 chainlist_url="https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/chains/eip155-$chain_id.json"
 
-chainlist_status_code=$(trim "$(curl -LI "$chainlist_url" -o /dev/null -w '%{http_code}\n' -s)")
+chainlist_status_code=$(trim "$(curl -sLI "$chainlist_url" -o /dev/null -w '%{http_code}\n' -s)")
 
 if [ "$chainlist_status_code" == "404" ]; then
   echo "Chain $chain_id is not in chainlist."
@@ -139,7 +139,7 @@ json_request='[
     }
 ]'
 
-response=$(curl "$rpc_url" --location --header 'Content-Type: application/json' --data "$json_request")
+response=$(curl -s "$rpc_url" --location --header 'Content-Type: application/json' --data "$json_request")
 
 if jq -e . >/dev/null 2>&1 <<< "$response"; then
   gas_price=$(jq -r '.[0].result' <<< "$response")
@@ -157,7 +157,7 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
 
   echo "Expected pre-fund: $expected_prefund"
 
-  deployer_address_balance=$(curl "$rpc_url" --location --header \
+  deployer_address_balance=$(curl -s "$rpc_url" --location --header \
   'Content-Type: application/json' --data '{
                 "jsonrpc": "2.0",
                 "method": "eth_getBalance",
