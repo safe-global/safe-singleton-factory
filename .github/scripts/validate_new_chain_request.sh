@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # This script is used to validate a GitHub issue for a new chain request.
 # What it does:
 # 1. Extracts the RPC URL from the issue body
@@ -18,10 +17,23 @@
 #
 # The script expects the following environment variables to be set:
 # - `ISSUE_BODY` - the body of the issue
-# - `FACTORY_ADDRESS` - the address of the factory contract
-# - `FACTORY_DEPLOYER_ADDRESS` - the address of the factory deployer
-# - `FACTORY_BYTECODE` - the bytecode of the factory contract
+# - `GITHUB_ENV` - the GitHub environment file
+# - `FACTORY_ADDRESS` (optional) - the address of the factory contract
+# - `FACTORY_DEPLOYER_ADDRESS` (optional) - the address of the factory deployer
+# - `FACTORY_BYTECODE` (optional) - the bytecode of the factory contract
 
+
+# Check if we are in "debug" mode - this makes it easier to test changes to this
+# script without needing to manually populate the environment variables.
+if [ "$1" == "--debug" ]; then
+    NUMBER="$2"
+    ISSUE_BODY="$(gh issue view $2 --json body --jq .body)"
+    GITHUB_ENV="/dev/stdout"
+fi
+
+FACTORY_ADDRESS="${FACTORY_ADDRESS:-0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7}"
+FACTORY_BYTECODE="${FACTORY_BYTECODE:-0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3}"
+FACTORY_DEPLOYER_ADDRESS="${FACTORY_DEPLOYER_ADDRESS:-0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37}"
 
 ERROR_MSG_RPC_FAILURE=\
 "**⛔️ Error:**<br>"\
@@ -67,7 +79,7 @@ report_error() {
     exit 1
 }
 
-rpc_url=$(echo "$ISSUE_BODY" | egrep -o 'https?://[^ ]+' -m 1 | head -1)
+rpc_url=$(echo "$ISSUE_BODY" | grep -E -o 'https?://[^ ]+' -m 1 | head -1)
 
 if [ -z "$rpc_url" ]; then
     echo "Failed to parse RPC URL from issue body"
