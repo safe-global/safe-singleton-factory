@@ -32,6 +32,11 @@ async function submitDeploymentTransaction() {
 	await simulateTransaction(transaction)
 	const transactionHash = await provider.send("eth_sendRawTransaction", [transaction])
 	console.log({ transactionHash })
+	const transactionReceipt = await provider.waitForTransaction(transactionHash, 1, 60000)
+	console.log({ transactionReceipt })
+	if (transactionReceipt.status !== 1) {
+		throw new Error("deployment transaction reverted")
+	}
 }
 
 runScript(submitDeploymentTransaction)
