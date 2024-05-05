@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
     cat <<EOF
-Estimate and compile a Safe singleton factory deployment.
+Deploy a Safe singleton factory to a new network.
 
 This tool wraps the NPM scripts 'estimate-compile' and 'submit' and:
 1. Parses the RPC URL from a GitHub issue
@@ -12,7 +12,7 @@ This tool wraps the NPM scripts 'estimate-compile' and 'submit' and:
 3. Automatically creates the GitHub PR for adding the deployment
 
 USAGE
-    estimate-compile.sh [ISSUE]
+    github-deploy.sh [ISSUE]
 
 ARGUMENTS
     ISSUE       The GitHub issue number of the 'new-chain' issue to deploy the
@@ -21,10 +21,10 @@ ARGUMENTS
 
 EXAMPLES
     List all issues that can be deployed:
-        estimate-compile.sh
+        github-deploy.sh
 
-    Deploy Safe singleton factory for issue number 42:
-        estimate-compile.sh 42
+    Deploy Safe singleton factory for GitHub issue #42:
+        github-deploy.sh 42
 EOF
 }
 
@@ -37,11 +37,11 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 if ! command -v gh &> /dev/null; then
-    echo "ERROR: Please install the 'gh' GitHub CLI"
+    echo "ERROR: Please install the 'gh' GitHub CLI" 1>&
     exit 1
 fi
 if ! command -v op &> /dev/null; then
-    echo "ERROR: Please install the 'op' 1Password CLI"
+    echo "ERROR: Please install the 'op' 1Password CLI" 1>&
     exit 1
 fi
 
