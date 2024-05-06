@@ -37,11 +37,11 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 if ! command -v gh &> /dev/null; then
-    echo "ERROR: Please install the 'gh' GitHub CLI" 1>&
+    echo "ERROR: Please install the 'gh' GitHub CLI" 1>&2
     exit 1
 fi
 if ! command -v op &> /dev/null; then
-    echo "ERROR: Please install the 'op' 1Password CLI" 1>&
+    echo "ERROR: Please install the 'op' 1Password CLI" 1>&2
     exit 1
 fi
 
