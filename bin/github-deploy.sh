@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+itemuid="${GITHUB_DEPLOY_ITEMUID:-pvct2lcpjspsvgwbh2wk3riq3m}"
+
 usage() {
     cat <<EOF
 Deploy a Safe singleton factory to a new network.
@@ -70,7 +72,7 @@ rpc="$(gh issue view $issue | grep -E -o 'https?://[^ ]+' -m 1 | head -1)"
 echo "=> $rpc"
 
 echo "### Building Deployment Transaction"
-mnemonic="$(op item get pvct2lcpjspsvgwbh2wk3riq3m --field password)"
+mnemonic="$(op item get "$itemuid" --field password)"
 MNEMONIC="$mnemonic" RPC="$rpc" yarn -s estimate-compile
 
 echo "### Submitting Transaction"
