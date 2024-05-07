@@ -3,7 +3,6 @@
 set -euo pipefail
 
 itemuid="${GITHUB_DEPLOY_ITEMUID:-pvct2lcpjspsvgwbh2wk3riq3m}"
-skippr="${GITHUB_DEPLOY_SKIPPR}"
 
 usage() {
     cat <<EOF
@@ -75,9 +74,19 @@ echo "=> $rpc"
 echo "### Building Deployment Transaction"
 mnemonic="$(op item get "$itemuid" --field password)"
 MNEMONIC="$mnemonic" RPC="$rpc" yarn -s estimate-compile
+commit=1
+if [[ -n "$(git status --untracked-files=no --porcelain -- artifacts/)" ]]; then
+    echo "WARN: Modified an existing deployment" 1>&2
+    commit=0
+fi
 
 echo "### Submitting Transaction"
-RPC="$rpc" yarn -s submit
+if [[ $commit -eq 1 ]]; then
+    RPC="$rpc" yarn -s submit
+else
+    echo "WARN: Cannot automatically submit, to manually submit run:" 1>&2
+    echo "      RPC='$rpc' yarn submit" 1>&2
+fi
 
 echo "### Creating PR"
 git checkout -b "$issue-github-deployment"
@@ -88,7 +97,9 @@ $(gh issue view $issue --json title --jq .title)
 Fixes #$issue
 EOF
 )"
-if [[ -z "$skippr" ]]; then
+if [[ $commit -eq 1 ]]; then
     git push --set-upstream origin "$issue-github-deployment"
     gh pr create --fill --reviewer safe-global/safe-protocol
+else
+    echo "WARN: Cannot automatically create PR" 1>&2
 fi
