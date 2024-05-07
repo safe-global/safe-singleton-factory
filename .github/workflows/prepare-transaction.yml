@@ -7,9 +7,6 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NUMBER: ${{ github.event.issue.number }}
   REPO: ${{ github.repository }}
-  FACTORY_ADDRESS: "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
-  FACTORY_BYTECODE: "0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3"
-  FACTORY_DEPLOYER_ADDRESS: "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37"
 
 jobs:
   prepareTransaction:
@@ -23,7 +20,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Run the validation script
-        run: . ./.github/scripts/validate_new_chain_request.sh
+        run: bash ./.github/scripts/validate_new_chain_request.sh
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
