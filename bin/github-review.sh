@@ -65,6 +65,11 @@ git clean -fd -- artifacts
 
 echo "### Approving PR"
 approve=1
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo "WARN: This PR modified an existing deployment" 1>&2
+    git restore -- artifacts
+    approve=0
+fi
 if [[ "$(echo "$files" | jq -r .[] | grep -E '^artifacts/[0-9]+/deployment.json$' | wc -l)" -ne 1 ]]; then
     echo "WARN: Not exactly one deployment artifact changed"
     approve=0
