@@ -52,7 +52,7 @@ case $# in
 esac
 
 echo "### Fetching RPC URL"
-issue="$(gh pr view $pr --json body --jq .body | sed -n 's/Fixes #\([0-9]\+\)/\1/p' | head -1)"
+issue="$(gh pr view $pr --json body --jq .body | sed -n 's/^.*Fixes #\([0-9][0-9]*\).*$/\1/p' | head -1)"
 rpc="$(gh issue view $issue | grep -E -o 'https?://[^ ]+' -m 1 | head -1)"
 files="$(gh pr view $pr --json files --jq [.files[].path])"
 echo "=> #$issue: $rpc"
