@@ -19,6 +19,7 @@
   "scripts": {
     "compile": "ts-node scripts/compile.ts",
     "compile:zk": "hardhat compile && hardhat deploy-zksync --script compile-zk.ts",
+    "verify": "ts-node scripts/verify.ts",
     "status": "ts-node scripts/status.ts",
     "submit": "ts-node scripts/submit.ts",
     "estimate": "ts-node scripts/estimate.ts",

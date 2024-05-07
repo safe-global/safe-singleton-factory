@@ -74,3 +74,10 @@ To submit a transaction after the deployment data is created:
 
 - Set `MNEMONIC` or `PK` in the `.env` file
 - Run `yarn compile:zk`
+
+## Verifying Networks
+
+In order to verify deployments (when reviewing PRs for example), you can use the `verify` script:
+
+- Set `RPC` in the `.env` file for the network.
+- Run `yarn verify`
