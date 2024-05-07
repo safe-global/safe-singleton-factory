@@ -6,6 +6,7 @@ import { runScript } from './utils';
 
 dotenv.config()
 
+const ADDRESS = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const CODEHASH = "0x2fa86add0aed31f33a762c9d88e807c475bd51d0f52bd0955754b2608f7e4989"
 
 async function verifyDeploymentCode() {
@@ -16,6 +17,9 @@ async function verifyDeploymentCode() {
 	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
 	const { address } = JSON.parse(await filesystem.readFile(filePath, { encoding: 'utf8' }))
 	console.log({ address })
+	if (address !== ADDRESS) {
+		throw new Error("unexpected address for Safe singleton factory")
+	}
 	const code = await provider.getCode(address)
 	const codehash = ethers.utils.keccak256(code)
 	console.log({ codehash, code })
