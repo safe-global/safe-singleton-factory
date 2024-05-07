@@ -77,7 +77,18 @@ To submit a transaction after the deployment data is created:
 
 ## Verifying Networks
 
-In order to verify deployments (when reviewing PRs for example), you can use the `verify` script:
+### Using the `github-review` Tool
+
+This repository contains a bash script [`bin/github-review.sh`](./bin/github-review.sh) for automatically verifying Safe singleton factory deployments to new networks and approving PRs by `$NUMBER`:
+
+- Install [`gh` GitHub CLI tool](https://cli.github.com/)
+- Run `bash bin/github-review.sh $NUMBER`
+
+**Note that this utility does not currently support zkSync-based network deployments**.
+
+### Manual Process
+
+Optionally, the deployment may verified manually with the `verify` NPM script:
 
 - Set `RPC` in the `.env` file for the network.
 - Run `yarn verify`

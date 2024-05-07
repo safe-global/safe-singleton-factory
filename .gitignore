@@ -5,7 +5,6 @@ node_modules/
 deployments/
 env/
 .env
-bin/
 ./solc
 coverage/
 coverage.json
