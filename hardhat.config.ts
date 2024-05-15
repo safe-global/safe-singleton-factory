@@ -22,8 +22,8 @@ const config: HardhatUserConfig = {
       zksync: true,
     },
     zkSyncTestnet: {
-      url: "https://testnet.era.zksync.dev",
-      ethNetwork: "goerli",
+      url: "https://sepolia.era.zksync.dev",
+      ethNetwork: "sepolia",
       zksync: true,
       verifyURL:
         "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
       zksync: true,
       verifyURL:
         "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
-    }
+    },
   },
   solidity: {
     version: "0.8.16",
