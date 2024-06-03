@@ -34,6 +34,10 @@ if [[ -f .env ]]; then
     echo "ERROR: Please remove '.env' file as it interferes with this script" 1>&2
     exit 1
 fi
+if [[ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]]; then
+    echo "ERROR: Please run this script from the 'main' branch" 1>&2
+    exit 1
+fi
 if [[ -n "$(git status --porcelain)" ]]; then
     echo "ERROR: Dirty Git index, please commit all changes before continuing" 1>&2
     exit 1
@@ -100,6 +104,8 @@ EOF
 if [[ $commit -eq 1 ]]; then
     git push --set-upstream origin "$issue-github-deployment"
     gh pr create --fill --reviewer safe-global/safe-protocol
+    git checkout main
+    git branch -D "$issue-github-deployment"
 else
     echo "WARN: Cannot automatically create PR" 1>&2
 fi
