@@ -163,8 +163,10 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
     report_error "$ERROR_MSG_PREFUND_CHECK"
   fi
 
-  # We multiply the gas limit by 1.4, just like the deployment script does it
-  gas_limit=$(( gas_limit * 14 / 10 ))
+  # We multiply the gas limit by 1.5, while the deployment script only
+  # multiplies by 1.4. This is to account for gas price fluctuations between the
+  # funding of the account and when the deployment actually happens.
+  gas_limit=$(( gas_limit * 15 / 10 ))
   expected_prefund=$((gas_limit * gas_price))
 
   echo "Expected pre-fund: $expected_prefund"
