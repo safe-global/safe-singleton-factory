@@ -14,14 +14,18 @@ async function simulateTransaction(transaction: BytesLike) {
 	const nonce = await provider.getTransactionCount(call.from as string)
 	console.log({ nonce })
 	if (call.nonce !== nonce) {
-		throw new Error('nonce must be 0')
+		throw new Error("nonce must be 0")
 	}
 	for (const property of ["hash", "type", "v", "r", "s"] as const) {
 		delete call[property]
 	}
 	console.log({ call })
 	const deployedBytecode = await provider.call(call as any)
-	console.log({ deployedBytecode })
+	const codeHash = ethers.utils.keccak256(ethers.utils.arrayify(deployedBytecode));
+	console.log({ deployedBytecode, codeHash })
+	if (codeHash != "0x2fa86add0aed31f33a762c9d88e807c475bd51d0f52bd0955754b2608f7e4989") {
+		throw new Error("deployed bytecode mismatch");
+	}
 }
 
 async function submitDeploymentTransaction() {
