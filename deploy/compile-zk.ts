@@ -42,6 +42,14 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const chainId = (await provider.getNetwork()).chainId;
   const nonce = await provider.getTransactionCount(fromAddress);
 
+  const params = utils.getPaymasterParams(
+    "0x950e3Bb8C6bab20b56a70550EC037E22032A413e", // Paymaster address
+    {
+      type: "General",
+      innerInput: new Uint8Array(),
+    }
+  );
+
   const tempTx = {
     from: fromAddress,
     to: utils.CONTRACT_DEPLOYER_ADDRESS,
@@ -50,6 +58,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
     type: 113,
     customData: {
       factoryDeps: [factoryArtifact.bytecode],
+      paymasterParams: params,
       gasPerPubdata: ethers.BigNumber.from(utils.DEFAULT_GAS_PER_PUBDATA_LIMIT),
     } as types.Eip712Meta,
     value: ethers.utils.parseEther("0"),
