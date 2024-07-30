@@ -20,6 +20,13 @@ body:
       description: RPC URL
     validations:
       required: true
+  - type: input
+    id: block_explorer
+    attributes:
+      label: Block Explorer
+      description: Block Explorer
+    validations:
+      required: true
   - type: checkboxes
     id: chainlist_url
     attributes:
