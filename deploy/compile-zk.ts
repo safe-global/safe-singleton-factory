@@ -49,7 +49,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
 
   if (process.env.PAYMASTER_ADDRESS) {
     const params = utils.getPaymasterParams(
-      "0x950e3Bb8C6bab20b56a70550EC037E22032A413e", // Paymaster address
+      process.env.PAYMASTER_ADDRESS, // Paymaster address
       {
         type: "General",
         innerInput: new Uint8Array(),
