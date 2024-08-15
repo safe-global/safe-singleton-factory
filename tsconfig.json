@@ -6,13 +6,14 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "strict": true,
-    "rootDirs": ["./src", "./scripts"],
-		"typeRoots": [ "./node_modules/@types", "./scripts/typings" ],
+    "useUnknownInCatchVariables": false,
+    "rootDirs": ["src", "scripts"],
+    "typeRoots": [ "node_modules/@types", "scripts/typings" ],
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
   "exclude": ["dist", "node_modules"],
-  "include": ["./src", "types.ts"]
+  "include": ["src"]
 }
