@@ -1,8 +1,8 @@
-import { promises as filesystem } from 'fs'
-import * as path from 'path'
-import { ethers, BytesLike } from 'ethers'
-import dotenv from "dotenv";
-import { runScript } from './utils';
+import { promises as filesystem } from "fs"
+import * as path from "path"
+import { ethers, BytesLike } from "ethers"
+import dotenv from "dotenv"
+import { runScript } from "./utils"
 
 dotenv.config()
 
@@ -32,8 +32,16 @@ async function submitDeploymentTransaction() {
 	const { chainId } = await provider.getNetwork()
 	console.log({ chainId })
 	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
-	const { transaction } = JSON.parse(await filesystem.readFile(filePath, { encoding: 'utf8' }))
-	await simulateTransaction(transaction)
+	const { transaction } = JSON.parse(await filesystem.readFile(filePath, { encoding: "utf8" }))
+	try {
+		await simulateTransaction(transaction)
+	} catch (error) {
+		if (error.code === "UNSUPPORTED_OPERATION" && error.transactionType === 113) {
+			console.warn("WARN: simulation not supported on zkSync, skipping...")
+		} else {
+			throw error
+		}
+	}
 	const transactionHash = await provider.send("eth_sendRawTransaction", [transaction])
 	console.log({ transactionHash })
 	const transactionReceipt = await provider.waitForTransaction(transactionHash, 1, 60000)
