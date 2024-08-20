@@ -77,7 +77,7 @@ echo "=> $rpc"
 
 echo "### Building Deployment Transaction"
 mnemonic="$(op item get "$itemuid" --field password --reveal)"
-MNEMONIC="$mnemonic" RPC="$rpc" yarn -s estimate-compile
+MNEMONIC="$mnemonic" RPC="$rpc" npm run -s estimate-compile
 commit=1
 if [[ -n "$(git status --untracked-files=no --porcelain -- artifacts/)" ]]; then
     echo "WARN: Modified an existing deployment" 1>&2
@@ -86,10 +86,10 @@ fi
 
 echo "### Submitting Transaction"
 if [[ $commit -eq 1 ]]; then
-    RPC="$rpc" yarn -s submit
+    RPC="$rpc" npm run -s submit
 else
     echo "WARN: Cannot automatically submit, to manually submit run:" 1>&2
-    echo "      RPC='$rpc' yarn submit" 1>&2
+    echo "      RPC='$rpc' npm run submit" 1>&2
 fi
 
 echo "### Creating PR"

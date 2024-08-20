@@ -60,7 +60,7 @@ echo "$files" | jq -r '.[] | "    - \(.)"'
 
 echo "### Verifying Deployment Artifacts"
 gh pr diff $pr --patch | git apply --include 'artifacts/**'
-RPC="$rpc" yarn -s verify
+RPC="$rpc" npm run -s verify
 git clean -fd -- artifacts
 
 echo "### Approving PR"
