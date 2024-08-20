@@ -76,7 +76,7 @@ rpc="$(gh issue view $issue | grep -E -o 'https?://[^ ]+' -m 1 | head -1)"
 echo "=> $rpc"
 
 echo "### Building Deployment Transaction"
-mnemonic="$(op item get "$itemuid" --field password)"
+mnemonic="$(op item get "$itemuid" --field password --reveal)"
 MNEMONIC="$mnemonic" RPC="$rpc" yarn -s estimate-compile
 commit=1
 if [[ -n "$(git status --untracked-files=no --porcelain -- artifacts/)" ]]; then
