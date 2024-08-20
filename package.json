@@ -24,8 +24,8 @@
     "submit": "ts-node scripts/submit.ts",
     "estimate": "ts-node scripts/estimate.ts",
     "estimate-compile": "ts-node scripts/estimate-compile.ts",
-    "build": "yarn rimraf dist && tsc",
-    "prepublish": "yarn build"
+    "build": "rimraf dist && tsc",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",

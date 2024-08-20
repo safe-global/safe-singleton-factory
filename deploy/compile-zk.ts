@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { utils, Wallet, Provider, EIP712Signer, types } from "zksync-web3";
 import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -7,12 +9,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnvironment) {
-  const RPC = process.env.RPC;
-  const MNEMONIC = process.env.MNEMONIC;
-  const PK = process.env.PK;
+  const { RPC, MNEMONIC, PK, ZK_PAYMASTER_ADDRESS } = process.env;
 
   if (!RPC) {
-    throw new Error('Missing RPC environment variable');
+    throw new Error("Missing RPC environment variable");
   }
   const provider = new Provider(RPC);
   let wallet: Wallet;
@@ -21,7 +21,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   } else if (MNEMONIC) {
     wallet =  Wallet.fromMnemonic(MNEMONIC).connect(provider);
   } else {
-    throw new Error('Either PK or MNEMONIC environment variable must be set');
+    throw new Error("Either PK or MNEMONIC environment variable must be set");
   }
 
   const fromAddress = wallet.address;
@@ -35,12 +35,27 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const constructor = "0x";
   // We use create2 here as the address of this will be zkSync specific in any case. This way it also provides additional security.
   const iface = new ethers.utils.Interface([
-    'function create2(bytes32 salt, bytes32 bytecodeHash, bytes constructor)'
+    "function create2(bytes32 salt, bytes32 bytecodeHash, bytes constructor)"
   ]);
-  const data = iface.encodeFunctionData('create2', [salt, bytecodeHash, constructor]);
+  const data = iface.encodeFunctionData("create2", [salt, bytecodeHash, constructor]);
 
   const chainId = (await provider.getNetwork()).chainId;
   const nonce = await provider.getTransactionCount(fromAddress);
+
+  const customData = {
+    factoryDeps: [factoryArtifact.bytecode],
+    gasPerPubdata: ethers.BigNumber.from(utils.DEFAULT_GAS_PER_PUBDATA_LIMIT),
+  } as types.Eip712Meta;
+
+  if (ZK_PAYMASTER_ADDRESS) {
+    customData.paymasterParams = utils.getPaymasterParams(
+      ZK_PAYMASTER_ADDRESS,
+      {
+        type: "General",
+        innerInput: new Uint8Array(),
+      }
+    );
+  }
 
   const tempTx = {
     from: fromAddress,
@@ -48,10 +63,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
     chainId: chainId,
     nonce: nonce,
     type: 113,
-    customData: {
-      factoryDeps: [factoryArtifact.bytecode],
-      gasPerPubdata: ethers.BigNumber.from(utils.DEFAULT_GAS_PER_PUBDATA_LIMIT),
-    } as types.Eip712Meta,
+    customData,
     value: ethers.utils.parseEther("0"),
     data: data,
   };
@@ -73,8 +85,6 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const rawTx = utils.serialize(factoryTx);
   const contractAddress = utils.create2Address(fromAddress, bytecodeHash, salt, constructor);
 
-  const fs = require('fs');
-  const path = require('path');
   let dir = path.join(__dirname, "..", "artifacts");
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);

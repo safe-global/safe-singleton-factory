@@ -71,22 +71,22 @@ Optionally, deployment may be done by manual configuration and execution of NPM 
 
 - Set `RPC` in the `.env` file for the new network.
 - Set `MNEMONIC` in the `.env` file.
-- Estimate transaction params via `yarn estimate`
-- Run `yarn compile <chain_id> [--gasPrice <overwrite_gas_price>] [--gasLimit <overwrite_gas_limit>]`
+- Estimate transaction params via `npm run estimate`
+- Run `npm run compile <chain_id> [--gasPrice <overwrite_gas_price>] [--gasLimit <overwrite_gas_limit>]`
 
 To do the `estimate` and `compile` steps together:
 
-- Run `yarn estimate-compile ["$RPC"]`
+- Run `npm run estimate-compile ["$RPC"]`
 
 To submit a transaction after the deployment data is created:
 
-- Run `yarn submit`
+- Run `npm run submit`
 
 #### For zkSync-based networks
 
 Use the same steps as above, but instead compile with:
 
-- Run `yarn compile:zk`
+- Run `npm run compile:zk`
 
 ## Verifying Networks
 
@@ -104,4 +104,4 @@ This repository contains a bash script [`bin/github-review.sh`](./bin/github-rev
 Optionally, the deployment may verified manually with the `verify` NPM script:
 
 - Set `RPC` in the `.env` file for the network.
-- Run `yarn verify`
+- Run `npm run verify`
