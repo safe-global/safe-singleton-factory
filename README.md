@@ -39,9 +39,9 @@ The Safe team will aim to respond to new network requests within two weeks.
 
 For all networks, the same deployer key is used. The address for this key is `0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37`.
 
-This results in the address for the factory being `0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7` for all bytecode-compatible EVM networks.
+This results in the address for the factory being [`0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7`](https://contractscan.xyz/contract/0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7) for all bytecode-compatible EVM networks.
 
-For zkSync-based networks, the same deployer is used, and the expected factory address is `0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`, and the factory is deployed using the `create2` method of the system deployer using the zero hash (`0x0000000000000000000000000000000000000000000000000000000000000000`).
+For zkSync-based networks, the same deployer is used, and the expected factory address is [`0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`](https://contractscan.xyz/contract/0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD), and the factory is deployed using the `create2` method of the system deployer using the zero hash (`0x0000000000000000000000000000000000000000000000000000000000000000`).
 
 ## NPM Package release cycle
 
