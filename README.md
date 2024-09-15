@@ -43,6 +43,8 @@ This results in the address for the factory being `0x914d7Fec6aaC8cd542e72Bca78B
 
 For zkSync-based networks, the same deployer is used, and the expected factory address is `0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`, and the factory is deployed using the `create2` method of the system deployer using the zero hash (`0x0000000000000000000000000000000000000000000000000000000000000000`).
 
+List of deployments: [`0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7`](https://contractscan.xyz/contract/0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7) and [`0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`](https://contractscan.xyz/contract/0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD) (not maintained by the Safe team).
+
 ## NPM Package release cycle
 
 The Safe team will aim to release a new version of the package every two weeks.
