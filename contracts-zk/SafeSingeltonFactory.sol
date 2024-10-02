@@ -34,7 +34,7 @@ contract SafeSingeltonFactory {
         // We cut off the method id (4 bytes) and salt (32 bytes) of the deploymentCalldata
         // as we overwrite it with the salt provided to the factory.
         // This is possible because we replace these with other values of the same type and size,
-        // therefore the overall payload send to the system contract is still valid and well formed.
+        // therefore the overall payload sent to the system contract is still valid and well formed.
         bytes memory truncatedDeploymentCalldata = msg.data[68:];
         (bool success,) = SystemContractsCaller
             .systemCallWithReturndata(
