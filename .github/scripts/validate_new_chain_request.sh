@@ -33,6 +33,7 @@ fi
 
 FACTORY_ADDRESS="${FACTORY_ADDRESS:-0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7}"
 FACTORY_BYTECODE="${FACTORY_BYTECODE:-0x604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3}"
+FACTORY_DEPLOYED_BYTECODE="${FACTORY_DEPLOYED_BYTECODE:-0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3}"
 FACTORY_DEPLOYER_ADDRESS="${FACTORY_DEPLOYER_ADDRESS:-0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37}"
 
 ERROR_MSG_RPC_FAILURE=\
@@ -49,6 +50,10 @@ ERROR_MSG_CHAINLIST_FAILURE=\
 ERROR_MSG_PREFUND_CHECK=\
 "**⛔️ Error:**<br>"\
 "There was an error while estimating the deployment transaction and checking the pre-fund. Please make sure that the RPC URL is valid and reachable.<br>"\
+":sparkles: You can edit the issue to trigger the check again. :sparkles:"
+ERROR_MSG_DEPLOYMENT_SIMULATION=\
+"**⛔️ Error:**<br>"\
+"There was an error simulating the contract deployment transaction. Please make sure that the RPC supports contract creation simulations.<br>"\
 ":sparkles: You can edit the issue to trigger the check again. :sparkles:"
 SUCCESS_MSG=\
 "**✅ Success:**<br>"\
@@ -148,6 +153,17 @@ json_request='[
             }
         ],
         "id": 2
+    },
+    {
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+            {
+                "data": "'$FACTORY_BYTECODE'"
+            },
+            "latest"
+        ],
+        "id": 3
     }
 ]'
 
@@ -158,9 +174,15 @@ if jq -e . >/dev/null 2>&1 <<< "$response"; then
   echo "Current gas price: $gas_price"
   gas_limit=$(jq -r '.[1].result' <<< "$response")
   echo "Estimated deployment gas limit: $gas_limit"
+  deployed_bytecode=$(jq -r '.[2].result' <<< "$response")
+  echo "Simuated deployed bytecode: $deployed_bytecode"
 
   if [[ "$gas_price" == "null" || "$gas_limit" == "null" ]]; then
     report_error "$ERROR_MSG_PREFUND_CHECK"
+  fi
+
+  if [[ "$deployed_bytecode" != "$FACTORY_DEPLOYED_BYTECODE" ]]; then
+    report_error "$ERROR_MSG_DEPLOYMENT_SIMULATION"
   fi
 
   # We multiply the gas limit by 1.5, while the deployment script only
