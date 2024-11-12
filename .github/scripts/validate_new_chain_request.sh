@@ -21,6 +21,7 @@
 # - `FACTORY_ADDRESS` (optional) - the address of the factory contract
 # - `FACTORY_DEPLOYER_ADDRESS` (optional) - the address of the factory deployer
 # - `FACTORY_BYTECODE` (optional) - the bytecode of the factory contract
+# - `FACTORY_DEPLOYED_BYTECODE` (optional) - the deployed bytecode of the factory contract
 
 
 # Check if we are in "debug" mode - this makes it easier to test changes to this
