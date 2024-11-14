@@ -20,6 +20,13 @@ body:
     validations:
       required: true
   - type: checkboxes
+    id: allow_bacth_request
+    attributes:
+      label: The RPC endpoint must allow batch requests for the bot script.
+      options:
+        - label: I confirm that the RPC allows batch requests
+          required: true
+  - type: checkboxes
     id: chainlist_url
     attributes:
       label: The chain must be added to https://chainlist.org/
