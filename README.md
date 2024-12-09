@@ -35,6 +35,20 @@ As the singleton is deployed with an EIP155 transaction, we must sign the deploy
 
 The Safe team will aim to respond to new network requests within two weeks.
 
+### OP Stack
+
+OP Stack based networks include the Safe Singleton Factory as a pre-installed contract, meaning that there is no need to deploy it. Therefore, there is no need to create a signed deployment transaction for such networks. These networks can be added to this repository by submitting a PR adding a `deployment.json` with the following contents:
+
+```json
+{
+	"gasPrice": 0,
+	"gasLimit": 0,
+	"signerAddress": "0x0000000000000000000000000000000000000000",
+	"transaction": "0x",
+	"address": "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
+}
+```
+
 ## Expected Addresses
 
 For all networks, the same deployer key is used. The address for this key is `0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37`.
