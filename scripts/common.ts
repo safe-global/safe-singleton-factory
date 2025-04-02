@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import * as path from 'path'
 import { promises as filesystem } from 'fs'
 import { CompilerOutputContract } from 'solc'
-import { arrayFromHexString, compileContracts } from './utils';
+import { arrayFromHexString, compileContracts, ensureDirectoryExists } from './utils';
 
 const signer = "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37";
 
@@ -10,15 +10,6 @@ export interface DeploymentEstimation {
 	chainId: number
 	gasLimit: ethers.BigNumber
 	gasPrice: ethers.BigNumber
-}
-
-export async function ensureDirectoryExists(absoluteDirectoryPath: string) {
-	try {
-		await filesystem.mkdir(absoluteDirectoryPath)
-	} catch (error) {
-		if (error.code === 'EEXIST') return
-		throw error
-	}
 }
 
 async function writeBytecode(bytecode: string) {
