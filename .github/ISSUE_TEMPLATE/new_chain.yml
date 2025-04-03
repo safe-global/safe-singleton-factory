@@ -35,6 +35,12 @@ body:
         - label: I confirm that the chain is added to chainlist
           required: true
   - type: checkboxes
+    id: op_stack
+    attributes:
+      label: OP Stack based networks have Safe Singleton deployed natively.
+      options:
+        - label: This is an OP Stack based network
+  - type: checkboxes
     id: prefunded
     attributes:
       label: After creating the issue, a bot will estimate the required pre-fund and post it in the comments. Please check this checkbox after you send the pre-fund.

@@ -56,7 +56,7 @@ ERROR_MSG_DEPLOYMENT_SIMULATION=\
 "**⛔️ Error:**<br>"\
 "There was an error simulating the contract deployment transaction. Please make sure that the RPC supports contract creation simulations.<br>"\
 ":sparkles: You can edit the issue to trigger the check again. :sparkles:"
-SUCCESS_MSG=\
+SUCCESS_MSG_FOR_DEPLOYMENT=\
 "**✅ Success:**<br>"\
 "The issue description is valid:<br>"\
 "- The RPC URL is valid<br>"\
@@ -65,6 +65,9 @@ SUCCESS_MSG=\
 ":sparkles: The team will be in touch with you soon :sparkles:"
 ADDRESS_NOT_PREFUNDED_ERR_MSG() {
     echo "**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send $1 wei to $FACTORY_DEPLOYER_ADDRESS and check the checkbox in the issue."
+}
+SUCCESS_MSG_FOR_PR() {
+    echo "**✅ Success:**<br/>The issue description is valid:<br/>- The RPC URL is valid<br/>- The chain is in the chainlist<br/>- The singleton factory is deployed already (OP Stack)<br/>:sparkles: The PR is created #$1 :sparkles:"
 }
 FACTORY_ALREADY_DEPLOYED_ERR_MSG="**⛔️ Error:**<br/>The factory is already deployed. Please use the existing factory at $FACTORY_ADDRESS."
 
@@ -122,8 +125,59 @@ factory_code=$(curl -s "$rpc_url" --location --header \
 if jq -e . >/dev/null 2>&1 <<< "$factory_code"; then
   factory_code=$(jq -r '.result' <<< "$factory_code")
 
-  if [ "$factory_code" != "0x" ] && [ "$factory_code" != "" ]; then
-    report_error "$FACTORY_ALREADY_DEPLOYED_ERR_MSG"
+  if [ -z "$op_stack" ]; then
+    # Check if the factory is already deployed
+    if [ "$factory_code" != "0x" ] && [ "$factory_code" != "" ]; then
+      report_error "$FACTORY_ALREADY_DEPLOYED_ERR_MSG"
+    fi
+  else
+    # Create a PR with the artifacts in this repo with default values
+    echo "Creating PR for OP Stack deployment..."
+
+    # Check if the chain ID is already in the artifacts directory
+    if [ -d "artifacts/$chain_id" ]; then
+      echo "Chain ID $chain_id already exists in artifacts directory."
+      report_error "$FACTORY_ALREADY_DEPLOYED_ERR_MSG"
+    fi
+    
+    # Create directory for chain artifacts
+    mkdir -p "artifacts/$chain_id"
+    
+    # Create deployment.json file with default values
+    cat > "artifacts/$chain_id/deployment.json" << EOF
+{
+  "gasPrice": 0,
+  "gasLimit": 0,
+  "signerAddress": "0x0000000000000000000000000000000000000000",
+  "transaction": "0x",
+  "address": "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
+}
+EOF
+
+    # Create a new branch for the PR
+    branch_name="$NUMBER-github-deployment"
+    git checkout -b "$branch_name"
+    
+    # Add and commit the changes
+    git add "artifacts/$chain_id/deployment.json"
+    git commit -m "Deploy Safe singleton factory for $chain_id"
+    
+    # Push the branch to remote
+    git push origin "$branch_name"
+    
+    # Create the PR using GitHub CLI
+    pr_url=$(gh pr create \
+      --title "Deploy Safe singleton factory for $chain_id" \
+      --body "Fixes #$ISSUE_NUMBER" \
+      --repo "$REPO")
+    
+    # Extract PR number from URL
+    pr_number=$(echo "$pr_url" | grep -o '[0-9]\+$')
+    
+    # Set success message with PR link
+    echo "COMMENT_OUTPUT=$(SUCCESS_MSG_FOR_PR $pr_number)" >> $GITHUB_ENV
+    
+    exit 0
   fi
 fi
 
@@ -216,5 +270,5 @@ else
   report_error "$ERROR_MSG_PREFUND_CHECK"
 fi
 
-echo "COMMENT_OUTPUT=$SUCCESS_MSG" >> $GITHUB_ENV
+echo "COMMENT_OUTPUT=$SUCCESS_MSG_FOR_DEPLOYMENT" >> $GITHUB_ENV
 echo "LABEL_OPERATION=--add-label" >> $GITHUB_ENV

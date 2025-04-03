@@ -20,7 +20,10 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Run the validation script
-        run: bash ./.github/scripts/validate_new_chain_request.sh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          bash ./.github/scripts/validate_new_chain_request.sh
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
