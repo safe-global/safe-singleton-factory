@@ -14,13 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            .github/scripts/validate_new_chain_request.sh
-          sparse-checkout-cone-mode: false
-
       - name: Run the validation script
-        run: bash ./.github/scripts/validate_new_chain_request.sh
+        run: |
+          npm run verify:new-chain-request > output.txt 2>&1
+          if grep -q "RESULT:OK" output.txt; then
+            echo "COMMENT_OUTPUT=**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:" >> $GITHUB_ENV
+            echo "LABEL_OPERATION=--add-label" >> $GITHUB_ENV
+          else
+            error_message=$(grep -F "**⛔️ Error:**<br>" output.txt)
+            echo "COMMENT_OUTPUT=${error_message}" >> $GITHUB_ENV
+            echo "LABEL_OPERATION=--remove-label" >> $GITHUB_ENV
+          fi
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
