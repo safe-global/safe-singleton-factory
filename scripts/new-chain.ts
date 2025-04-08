@@ -42,9 +42,8 @@ async function newChainWrapper() {
 }
 
 async function verifyNewChainRequest(summary: Record<string, unknown>) {
-	const issueBody = process.env.ISSUE_BODY
 	// Extract the RPC URL (first URL) from the issue body as a string
-	const rpcUrl = issueBody?.match(/https?:\/\/[^\s]+/g)?.[0]
+	const rpcUrl = process.env.RPC
 	if (!rpcUrl) {
 		throw getNewChainError(ErrorTypes.RPC_URL_NOT_FOUND)
 	}
