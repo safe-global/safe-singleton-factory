@@ -2,15 +2,32 @@ import fs from 'fs'
 import path from 'path'
 import { ethers } from 'ethers'
 import dotenv from "dotenv";
-import { ScriptError, ScriptErrorCode, runScript } from './utils';
+import { ScriptError, runScript } from './utils';
 import { ADDRESS, CODEHASH, FACTORY_BYTECODE, SIGNER } from './constants';
 
 dotenv.config()
 
+enum ScriptErrorCode {
+	UNKNOWN_ERROR = 100,
+	RPC_URL_NOT_FOUND,
+	FACTORY_ALREADY_DEPLOYED,
+	CHAIN_NOT_LISTED,
+	FACTORY_DIFFERENT_BYTECODE,
+	FACTORY_PRE_DEPLOYED,
+	FACTORY_NOT_ADDED_TO_REPO,
+	FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED,
+	GAS_PRICE_NOT_RETRIEVED,
+	GAS_LIMIT_NOT_ESTIMATED,
+	GAS_LIMIT_ESTIMATION_FAILED,
+	DEPLOYMENT_SIMULATION_FAILED,
+	FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE,
+	PREFUND_NEEDED
+}
+
 async function newChainWrapper() {
 	const summary: Record<string, unknown> = {};
-	summary.SUCCESS = false
-	summary.LABEL_OPERATION = "--remove-label"
+	summary.success = false
+	summary.labelOperation = "--remove-label"
 	try {
 		await verifyNewChainRequest(summary)
 	} finally {
@@ -28,7 +45,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// Extract the RPC URL (first URL) from the issue body as a string
 	const rpcUrl = issueBody?.match(/https?:\/\/[^\s]+/g)?.[0]
 	if (!rpcUrl) {
-		summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.RPC_URL_NOT_FOUND)
+		summary.error = getNewChainErrorMessage(ScriptErrorCode.RPC_URL_NOT_FOUND)
 		throwNewChainError(ScriptErrorCode.RPC_URL_NOT_FOUND, summary.ERROR as string)
 	}
 
@@ -43,7 +60,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// and we can proceed with the deployment
 	const deployed = fs.existsSync(filePath)
 	if (deployed) {
-		summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED)
+		summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED)
 		throwNewChainError(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED, summary.ERROR as string)
 	}
 
@@ -68,26 +85,26 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	if (ethers.utils.hexDataLength(code) > 0) {
 		// Check if the codehash matches the expected codehash
 		if (codehash !== CODEHASH) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE)
 			throwNewChainError(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE, summary.ERROR as string)
 		}
 
 		if (nonce === 0) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_PRE_DEPLOYED)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_PRE_DEPLOYED)
 			throwNewChainError(ScriptErrorCode.FACTORY_PRE_DEPLOYED, summary.ERROR as string)
 		} else {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO)
 			throwNewChainError(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO, summary.ERROR as string)
 		}
 		// TODO: Create a PR to add the artifact to the repository
 	} else if (nonce > 0) {
-		summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED)
+		summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED)
 		throwNewChainError(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED, summary.ERROR as string)
 	} else {
 		// Get the gas price and gas limit
 		const gasPrice = await provider.getGasPrice()
 		if(!gasPrice) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED)
 			throwNewChainError(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED, summary.ERROR as string)
 		}
 		let gasLimit;
@@ -97,11 +114,11 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 			if(!gasLimit) {
-				summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED)
+				summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED)
 				throwNewChainError(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED, summary.ERROR as string)
 			}
 		} catch (error) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED)
 			throwNewChainError(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED, summary.ERROR as string)
 		}
 
@@ -118,7 +135,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 		} catch (error) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED)
 			throwNewChainError(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED, summary.ERROR as string)
 		}
 		summary.simulation = simulation
@@ -126,7 +143,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 		summary.simulationCodehash = simulationCodehash
 		// Check if the simulation codehash matches the expected codehash
 		if (simulationCodehash !== CODEHASH) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE)
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE)
 			throwNewChainError(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE, summary.ERROR as string)
 		}
 
@@ -134,13 +151,13 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 		const balance = await provider.getBalance(SIGNER)
 		summary.balance = ethers.utils.formatEther(balance)
 		if (balance.lt(gasEstimate)) {
-			summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.PREFUND_NEEDED, [gasEstimate.toString()])
+			summary.error = getNewChainErrorMessage(ScriptErrorCode.PREFUND_NEEDED, [gasEstimate.toString()])
 			throwNewChainError(ScriptErrorCode.PREFUND_NEEDED, summary.ERROR as string)
 		}
 	}
-	summary.SUCCESS = true
-	summary.RESPONSE = `**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:`
-	summary.LABEL_OPERATION = "--add-label"
+	summary.success = true
+	summary.response = `**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:`
+	summary.labelOperation = "--add-label"
 }
 
 function throwNewChainError(errorCode: ScriptErrorCode, errorMessage: string): ScriptError {

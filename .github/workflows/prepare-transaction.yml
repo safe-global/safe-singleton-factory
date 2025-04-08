@@ -16,23 +16,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run the validation script
         run: |
-          npm run verify:new-chain-request
-          SUCCESS=$(jq -r '.SUCCESS' $SUMMARY_FILE)
+          SUMMARY_FILE=summary.json npm run verify:new-chain-request
+          SUCCESS=$(jq -r '.success' $SUMMARY_FILE)
           if [ "$SUCCESS" = "true" ]; then
-            RESPONSE=$(jq -r '.RESPONSE' $SUMMARY_FILE)
+            RESPONSE=$(jq -r '.response' $SUMMARY_FILE)
             echo "COMMENT_OUTPUT=$RESPONSE" >> $GITHUB_ENV
           else
-            ERROR=$(jq -r '.ERROR' $SUMMARY_FILE)
+            ERROR=$(jq -r '.error' $SUMMARY_FILE)
             echo "COMMENT_OUTPUT=$ERROR" >> $GITHUB_ENV
           fi
-          LABEL_OPERATION=$(jq -r '.LABEL_OPERATION' $SUMMARY_FILE)
+          LABEL_OPERATION=$(jq -r '.labelOperation' $SUMMARY_FILE)
           echo "LABEL_OPERATION=$LABEL_OPERATION" >> $GITHUB_ENV
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
           FACTORY_BYTECODE: ${{ env.FACTORY_BYTECODE }}
           FACTORY_DEPLOYER_ADDRESS: ${{ env.FACTORY_DEPLOYER_ADDRESS }}
-          SUMMARY_FILE: ${{ env.SUMMARY_FILE }}
 
       - name: Post Comment to the Issue
         if: always()
