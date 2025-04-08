@@ -30,6 +30,12 @@ async function newChainWrapper() {
 	summary.labelOperation = "--remove-label"
 	try {
 		await verifyNewChainRequest(summary)
+	} catch (error) {
+		if (error instanceof ScriptError) {
+			summary.error = error.message
+		} else {
+			summary.error = `**⛔️ Error:**<br>Unknown error: ${error}`
+		}
 	} finally {
 		const summaryFile = process.env.SUMMARY_FILE
 		if (summaryFile) {
@@ -45,8 +51,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// Extract the RPC URL (first URL) from the issue body as a string
 	const rpcUrl = issueBody?.match(/https?:\/\/[^\s]+/g)?.[0]
 	if (!rpcUrl) {
-		summary.error = getNewChainErrorMessage(ScriptErrorCode.RPC_URL_NOT_FOUND)
-		throwNewChainError(ScriptErrorCode.RPC_URL_NOT_FOUND, summary.ERROR as string)
+		throw getNewChainError(ScriptErrorCode.RPC_URL_NOT_FOUND)
 	}
 
 	const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
@@ -60,8 +65,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// and we can proceed with the deployment
 	const deployed = fs.existsSync(filePath)
 	if (deployed) {
-		summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED)
-		throwNewChainError(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED, summary.ERROR as string)
+		throw getNewChainError(ScriptErrorCode.FACTORY_ALREADY_DEPLOYED)
 	}
 
 	// Check if the chain is listed in the chainlist
@@ -71,8 +75,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	summary.chainlist = chainlist
 	summary.onChainlist = onChainlist
 	if (!onChainlist) {
-		summary.ERROR = getNewChainErrorMessage(ScriptErrorCode.CHAIN_NOT_LISTED, [chainId.toString()])
-		throwNewChainError(ScriptErrorCode.CHAIN_NOT_LISTED, summary.ERROR as string)
+		throw getNewChainError(ScriptErrorCode.CHAIN_NOT_LISTED, [chainId.toString()])
 	}
 
 	const nonce = await provider.getTransactionCount(SIGNER)
@@ -85,27 +88,22 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	if (ethers.utils.hexDataLength(code) > 0) {
 		// Check if the codehash matches the expected codehash
 		if (codehash !== CODEHASH) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE)
-			throwNewChainError(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE)
 		}
 
 		if (nonce === 0) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_PRE_DEPLOYED)
-			throwNewChainError(ScriptErrorCode.FACTORY_PRE_DEPLOYED, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.FACTORY_PRE_DEPLOYED)
 		} else {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO)
-			throwNewChainError(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO)
 		}
 		// TODO: Create a PR to add the artifact to the repository
 	} else if (nonce > 0) {
-		summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED)
-		throwNewChainError(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED, summary.ERROR as string)
+		throw getNewChainError(ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED)
 	} else {
 		// Get the gas price and gas limit
 		const gasPrice = await provider.getGasPrice()
 		if(!gasPrice) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED)
-			throwNewChainError(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED)
 		}
 		let gasLimit;
 		try {
@@ -114,12 +112,10 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 			if(!gasLimit) {
-				summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED)
-				throwNewChainError(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED, summary.ERROR as string)
+				throw getNewChainError(ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED)
 			}
 		} catch (error) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED)
-			throwNewChainError(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED)
 		}
 
 		const gasEstimate = gasPrice.mul(gasLimit!).mul(15).div(10) // 15% buffer
@@ -135,24 +131,21 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 		} catch (error) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED)
-			throwNewChainError(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED)
 		}
 		summary.simulation = simulation
 		const simulationCodehash = ethers.utils.keccak256(simulation)
 		summary.simulationCodehash = simulationCodehash
 		// Check if the simulation codehash matches the expected codehash
 		if (simulationCodehash !== CODEHASH) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE)
-			throwNewChainError(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE)
 		}
 
 		// Check if the deployer account has enough balance
 		const balance = await provider.getBalance(SIGNER)
 		summary.balance = ethers.utils.formatEther(balance)
 		if (balance.lt(gasEstimate)) {
-			summary.error = getNewChainErrorMessage(ScriptErrorCode.PREFUND_NEEDED, [gasEstimate.toString()])
-			throwNewChainError(ScriptErrorCode.PREFUND_NEEDED, summary.ERROR as string)
+			throw getNewChainError(ScriptErrorCode.PREFUND_NEEDED, [gasEstimate.toString()])
 		}
 	}
 	summary.success = true
@@ -160,45 +153,53 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	summary.labelOperation = "--add-label"
 }
 
-function throwNewChainError(errorCode: ScriptErrorCode, errorMessage: string): ScriptError {
-	if (errorCode in ScriptErrorCode) {
-		throw new ScriptError(errorMessage, errorCode)
-	} else {
-		throw new ScriptError(errorMessage, ScriptErrorCode.UNKNOWN_ERROR)
-	}
-}
-
-function getNewChainErrorMessage(errorCode: ScriptErrorCode, errorParameters?: string[]): string {
+function getNewChainError(errorCode: ScriptErrorCode, errorParameters?: string[]): ScriptError {
+	let message: string
 	switch (errorCode) {
 		case ScriptErrorCode.RPC_URL_NOT_FOUND:
-			return `**⛔️ Error:**<br>RPC URL not found in the issue body.`
+			message = `**⛔️ Error:**<br>RPC URL not found in the issue body.`
+			break
 		case ScriptErrorCode.FACTORY_ALREADY_DEPLOYED:
-			return `**⛔️ Error:**<br>The factory is already deployed.`
+			message = `**⛔️ Error:**<br>The factory is already deployed.`
+			break
 		case ScriptErrorCode.CHAIN_NOT_LISTED:
-			return `**⛔️ Error:**<br>Chain ${errorParameters?.[0]} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>`
+			message = `**⛔️ Error:**<br>Chain ${errorParameters?.[0]} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>`
+			break
 		case ScriptErrorCode.FACTORY_DIFFERENT_BYTECODE:
-			return `**⛔️ Error:**<br>Factory is deployed with different bytecode.`
+			message = `**⛔️ Error:**<br>Factory is deployed with different bytecode.`
+			break
 		case ScriptErrorCode.FACTORY_PRE_DEPLOYED:
-			return `**⛔️ Error:**<br>Factory is pre-deployed on the chain.`
+			message = `**⛔️ Error:**<br>Factory is pre-deployed on the chain.`
+			break
 		case ScriptErrorCode.FACTORY_NOT_ADDED_TO_REPO:
-			return `**⛔️ Error:**<br>Factory has been deployed but not added to the repository.`
+			message = `**⛔️ Error:**<br>Factory has been deployed but not added to the repository.`
+			break
 		case ScriptErrorCode.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED:
-			return `**⛔️ Error:**<br>Factory deployer account nonce burned.`
+			message = `**⛔️ Error:**<br>Factory deployer account nonce burned.`
+			break
 		case ScriptErrorCode.GAS_PRICE_NOT_RETRIEVED:
-			return `**⛔️ Error:**<br>Gas price couldn't be retrieved. Please make sure that the RPC URL is valid and reachable.`
+			message = `**⛔️ Error:**<br>Gas price couldn't be retrieved. Please make sure that the RPC URL is valid and reachable.`
+			break
 		case ScriptErrorCode.GAS_LIMIT_NOT_ESTIMATED:
-			return `**⛔️ Error:**<br>Gas limit couldn't be estimated. Please make sure that the RPC URL is valid and reachable.`
+			message = `**⛔️ Error:**<br>Gas limit couldn't be estimated. Please make sure that the RPC URL is valid and reachable.`
+			break
 		case ScriptErrorCode.GAS_LIMIT_ESTIMATION_FAILED:
-			return `**⛔️ Error:**<br>Gas limit estimation failed. Please make sure that the RPC URL is valid and reachable.`
+			message = `**⛔️ Error:**<br>Gas limit estimation failed. Please make sure that the RPC URL is valid and reachable.`
+			break
 		case ScriptErrorCode.DEPLOYMENT_SIMULATION_FAILED:
-			return `**⛔️ Error:**<br>Deployment simulation failed. Please make sure that the RPC URL is valid and reachable.`
+			message = `**⛔️ Error:**<br>Deployment simulation failed. Please make sure that the RPC URL is valid and reachable.`
+			break
 		case ScriptErrorCode.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE:
-			return `**⛔️ Error:**<br>Factory deployment simulation returned different bytecode.`
+			message = `**⛔️ Error:**<br>Factory deployment simulation returned different bytecode.`
+			break
 		case ScriptErrorCode.PREFUND_NEEDED:
-			return `**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send ${errorParameters?.[0]} wei to ${SIGNER} and check the checkbox in the issue.`
+			message = `**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send ${errorParameters?.[0]} wei to ${SIGNER} and check the checkbox in the issue.`
+			break
 		default:
-			return `**⛔️ Error:**<br>Unknown error`
+			message = `**⛔️ Error:**<br>Unknown error`
+			errorCode = ScriptErrorCode.UNKNOWN_ERROR
 	}
+	return new ScriptError(message, errorCode)
 }
 
 runScript(newChainWrapper)
