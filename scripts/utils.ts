@@ -46,24 +46,12 @@ export async function compileContracts(): Promise<CompilerOutput> {
 	return compilerOutput
 }
 
-export class ScriptError extends Error {
-	constructor(message: string, public exitCode: number = 1) {
-		super(message)
-		this.name = "ScriptError"
-	}
-}
-
 export function runScript(script: () => Promise<any>) {
 	script()
 		.then(() => process.exit(0))
 		.catch(error => {
-			if (error instanceof ScriptError) {
-				console.error(error.message)
-				process.exit(error.exitCode)
-			} else {
-				console.error(error)
-				process.exit(1)
-			}
+			console.error(error)
+			process.exit(1)
 		})
 }
 
