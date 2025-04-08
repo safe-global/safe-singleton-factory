@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { ethers } from 'ethers'
 import dotenv from "dotenv";
-import { runScript } from './utils';
+import { NewChainError, runScript } from './utils';
 import { ADDRESS, CODEHASH, FACTORY_BYTECODE, SIGNER } from './constants';
 
 dotenv.config()
@@ -45,7 +45,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// Extract the RPC URL (first URL) from the issue body as a string
 	const rpcUrl = process.env.RPC
 	if (!rpcUrl) {
-		throw getNewChainError(ErrorTypes.RPC_URL_NOT_FOUND)
+		throw NewChainError.rpcNotFound()
 	}
 
 	const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
@@ -59,7 +59,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	// and we can proceed with the deployment
 	const deployed = fs.existsSync(filePath)
 	if (deployed) {
-		throw getNewChainError(ErrorTypes.FACTORY_ALREADY_DEPLOYED)
+		throw NewChainError.factoryAlreadyDeployed()
 	}
 
 	// Check if the chain is listed in the chainlist
@@ -69,7 +69,7 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	summary.chainlist = chainlist
 	summary.onChainlist = onChainlist
 	if (!onChainlist) {
-		throw getNewChainError(ErrorTypes.CHAIN_NOT_LISTED, [chainId.toString()])
+		throw NewChainError.chainNotListed(chainId.toString())
 	}
 
 	const nonce = await provider.getTransactionCount(SIGNER)
@@ -82,22 +82,22 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 	if (ethers.utils.hexDataLength(code) > 0) {
 		// Check if the codehash matches the expected codehash
 		if (codehash !== CODEHASH) {
-			throw getNewChainError(ErrorTypes.FACTORY_DIFFERENT_BYTECODE)
+			throw NewChainError.factoryDifferentBytecode()
 		}
 
 		if (nonce === 0) {
-			throw getNewChainError(ErrorTypes.FACTORY_PRE_DEPLOYED)
+			throw NewChainError.factoryPreDeployed()
 		} else {
-			throw getNewChainError(ErrorTypes.FACTORY_NOT_ADDED_TO_REPO)
+			throw NewChainError.factoryNotAddedToRepo()
 		}
 		// TODO: Create a PR to add the artifact to the repository
 	} else if (nonce > 0) {
-		throw getNewChainError(ErrorTypes.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED)
+		throw NewChainError.factoryDeployerAccountNonceBurned()
 	} else {
 		// Get the gas price and gas limit
 		const gasPrice = await provider.getGasPrice()
 		if(!gasPrice) {
-			throw getNewChainError(ErrorTypes.GAS_PRICE_NOT_RETRIEVED)
+			throw NewChainError.gasPriceNotRetrieved()
 		}
 		let gasLimit;
 		try {
@@ -106,10 +106,10 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 			if(!gasLimit) {
-				throw getNewChainError(ErrorTypes.GAS_LIMIT_NOT_ESTIMATED)
+				throw NewChainError.gasLimitNotEstimated()
 			}
 		} catch (error) {
-			throw getNewChainError(ErrorTypes.GAS_LIMIT_ESTIMATION_FAILED)
+			throw NewChainError.gasLimitEstimationFailed()
 		}
 
 		const gasEstimate = gasPrice.mul(gasLimit!).mul(15).div(10) // 15% buffer
@@ -125,73 +125,25 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 				data: FACTORY_BYTECODE,
 			})
 		} catch (error) {
-			throw getNewChainError(ErrorTypes.DEPLOYMENT_SIMULATION_FAILED)
+			throw NewChainError.deploymentSimulationFailed()
 		}
 		summary.simulation = simulation
 		const simulationCodehash = ethers.utils.keccak256(simulation)
 		summary.simulationCodehash = simulationCodehash
 		// Check if the simulation codehash matches the expected codehash
 		if (simulationCodehash !== CODEHASH) {
-			throw getNewChainError(ErrorTypes.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE)
+			throw NewChainError.factoryDeploymentSimulationDifferentBytecode()
 		}
 
 		// Check if the deployer account has enough balance
 		const balance = await provider.getBalance(SIGNER)
 		summary.balance = ethers.utils.formatEther(balance)
 		if (balance.lt(gasEstimate)) {
-			throw getNewChainError(ErrorTypes.PREFUND_NEEDED, [gasEstimate.toString()])
+			throw NewChainError.prefundNeeded(gasEstimate.toString(), SIGNER)
 		}
 	}
 	summary.response = `**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:`
 	summary.labelOperation = "--add-label"
-}
-
-function getNewChainError(errorCode: ErrorTypes, errorParameters?: string[]): Error {
-	let message: string
-	switch (errorCode) {
-		case ErrorTypes.RPC_URL_NOT_FOUND:
-			message = `**⛔️ Error:**<br>RPC URL not found in the issue body.`
-			break
-		case ErrorTypes.FACTORY_ALREADY_DEPLOYED:
-			message = `**⛔️ Error:**<br>The factory is already deployed.`
-			break
-		case ErrorTypes.CHAIN_NOT_LISTED:
-			message = `**⛔️ Error:**<br>Chain ${errorParameters?.[0]} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>`
-			break
-		case ErrorTypes.FACTORY_DIFFERENT_BYTECODE:
-			message = `**⛔️ Error:**<br>Factory is deployed with different bytecode.`
-			break
-		case ErrorTypes.FACTORY_PRE_DEPLOYED:
-			message = `**⛔️ Error:**<br>Factory is pre-deployed on the chain.`
-			break
-		case ErrorTypes.FACTORY_NOT_ADDED_TO_REPO:
-			message = `**⛔️ Error:**<br>Factory has been deployed but not added to the repository.`
-			break
-		case ErrorTypes.FACTORY_DEPLOYER_ACCOUNT_NONCE_BURNED:
-			message = `**⛔️ Error:**<br>Factory deployer account nonce burned.`
-			break
-		case ErrorTypes.GAS_PRICE_NOT_RETRIEVED:
-			message = `**⛔️ Error:**<br>Gas price couldn't be retrieved. Please make sure that the RPC URL is valid and reachable.`
-			break
-		case ErrorTypes.GAS_LIMIT_NOT_ESTIMATED:
-			message = `**⛔️ Error:**<br>Gas limit couldn't be estimated. Please make sure that the RPC URL is valid and reachable.`
-			break
-		case ErrorTypes.GAS_LIMIT_ESTIMATION_FAILED:
-			message = `**⛔️ Error:**<br>Gas limit estimation failed. Please make sure that the RPC URL is valid and reachable.`
-			break
-		case ErrorTypes.DEPLOYMENT_SIMULATION_FAILED:
-			message = `**⛔️ Error:**<br>Deployment simulation failed. Please make sure that the RPC URL is valid and reachable.`
-			break
-		case ErrorTypes.FACTORY_DEPLOYMENT_SIMULATION_DIFFERENT_BYTECODE:
-			message = `**⛔️ Error:**<br>Factory deployment simulation returned different bytecode.`
-			break
-		case ErrorTypes.PREFUND_NEEDED:
-			message = `**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send ${errorParameters?.[0]} wei to ${SIGNER} and check the checkbox in the issue.`
-			break
-		default:
-			message = `**⛔️ Error:**<br>Unknown error`
-	}
-	return new Error(message)
 }
 
 runScript(newChainWrapper)
