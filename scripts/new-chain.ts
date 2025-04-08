@@ -26,15 +26,14 @@ enum ScriptErrorCode {
 
 async function newChainWrapper() {
 	const summary: Record<string, unknown> = {};
-	summary.success = false
 	summary.labelOperation = "--remove-label"
 	try {
 		await verifyNewChainRequest(summary)
 	} catch (error) {
 		if (error instanceof ScriptError) {
-			summary.error = error.message
+			summary.response = error.message
 		} else {
-			summary.error = `**⛔️ Error:**<br>Unknown error: ${error}`
+			summary.response = `**⛔️ Error:**<br>Unknown error: ${error}`
 		}
 	} finally {
 		const summaryFile = process.env.SUMMARY_FILE
@@ -148,7 +147,6 @@ async function verifyNewChainRequest(summary: Record<string, unknown>) {
 			throw getNewChainError(ScriptErrorCode.PREFUND_NEEDED, [gasEstimate.toString()])
 		}
 	}
-	summary.success = true
 	summary.response = `**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:`
 	summary.labelOperation = "--add-label"
 }
