@@ -228,7 +228,7 @@ class NewChainError extends Error {
 	static prefundNeeded(amount: string, signer: string) {
 		return new NewChainError(
 			"Prefund needed",
-			`**💸 Pre-fund needed:**<br/>We need a pre-fund to deploy the factory. Please send ${amount} wei to ${signer} and check the checkbox in the issue.`
+			`**💸 Pre-fund needed:**<br>We need a pre-fund to deploy the factory. Please send ${amount} wei to ${signer} and check the checkbox in the issue.`
 		);
 	}
 }
