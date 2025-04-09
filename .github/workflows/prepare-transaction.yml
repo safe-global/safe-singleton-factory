@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run the validation script
         run: |
+          npm ci
           RPC_URL=$(echo "$ISSUE_BODY" | grep -E -o 'https?://[^ ]+' -m 1 | head -1)
           SUMMARY_FILE=summary.json RPC=$RPC_URL npm run verify:new-chain-request || true
           echo "COMMENT_OUTPUT=$(jq -r '.commentOutput' $SUMMARY_FILE)" >> $GITHUB_ENV
