@@ -15,7 +15,11 @@ async function newChainWrapper() {
 	try {
 		await verifyNewChainRequest()
 		summary = {
-			commentOutput: `**✅ Success:**<br>The issue description is valid:<br>- The RPC URL is valid<br>- The chain is in the chainlist<br>- The deployer address is pre-funded<br>:sparkles: The team will be in touch with you soon :sparkles:`,
+			commentOutput: `**✅ Success:**<br>The issue description is valid:<br>` +
+				`- The RPC URL is valid<br>` +
+				`- The chain is in the chainlist<br>` +
+				`- The deployer address is pre-funded<br>` +
+				`:sparkles: The team will be in touch with you soon :sparkles:`,
 			labelOperation: "--add-label"
 		}
 	} catch (error) {
