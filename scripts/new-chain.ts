@@ -22,7 +22,7 @@ async function newChainWrapper() {
 		summary = {
 			commentOutput: (error instanceof NewChainError)
 				? error.comment
-				: `Unknown Error: ${error}`,
+				: `**⛔️ Error:**<br>Unexpected error verifying new chain.<br>Error Details: ${error}`,
 			labelOperation: "--remove-label"
 		}
 	} finally {
