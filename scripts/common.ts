@@ -2,23 +2,13 @@ import { ethers } from 'ethers';
 import * as path from 'path'
 import { promises as filesystem } from 'fs'
 import { CompilerOutputContract } from 'solc'
-import { arrayFromHexString, compileContracts } from './utils';
-
-const signer = "0xE1CB04A0fA36DdD16a06ea828007E35e1a3cBC37";
+import { arrayFromHexString, compileContracts, ensureDirectoryExists } from './utils';
+import { SIGNER } from './constants';
 
 export interface DeploymentEstimation {
 	chainId: number
 	gasLimit: ethers.BigNumber
 	gasPrice: ethers.BigNumber
-}
-
-export async function ensureDirectoryExists(absoluteDirectoryPath: string) {
-	try {
-		await filesystem.mkdir(absoluteDirectoryPath)
-	} catch (error) {
-		if (error.code === 'EEXIST') return
-		throw error
-	}
 }
 
 async function writeBytecode(bytecode: string) {
@@ -63,7 +53,7 @@ export async function estimateDeploymentTransaction(rpcUrl: string): Promise<Dep
 	const compilerOutput = await compileContracts()
 	const contract = compilerOutput.contracts['deterministic-deployment-proxy.yul']['Proxy']
 	const data = "0x" + contract.evm.bytecode.object
-	const gasLimit = await provider.estimateGas({ data, from: signer })
+	const gasLimit = await provider.estimateGas({ data, from: SIGNER })
 	console.log({estimate: gasLimit.toString() })
 	const gasPrice = await provider.getGasPrice()
 	console.log({gasPriceGwei: ethers.utils.formatUnits(gasPrice, "gwei"), gasPrice: gasPrice.toString() })

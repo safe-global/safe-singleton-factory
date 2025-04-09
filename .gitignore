@@ -9,3 +9,4 @@ env/
 coverage/
 coverage.json
 yarn-error.log
+summary.json

@@ -47,12 +47,12 @@ export async function compileContracts(): Promise<CompilerOutput> {
 }
 
 export function runScript(script: () => Promise<any>) {
-	script().then(() => {
-		process.exit(0)
-	}).catch(error => {
-		console.error(error)
-		process.exit(1)
-	})
+	script()
+		.then(() => process.exit(0))
+		.catch(error => {
+			console.error(error)
+			process.exit(1)
+		})
 }
 
 export function arrayFromHexString(value: string): Uint8Array {
@@ -62,4 +62,13 @@ export function arrayFromHexString(value: string): Uint8Array {
 		bytes.push(Number.parseInt(`${normalized[i]}${normalized[i+1]}`, 16))
 	}
 	return new Uint8Array(bytes)
+}
+
+export async function ensureDirectoryExists(absoluteDirectoryPath: string) {
+	try {
+		await filesystem.mkdir(absoluteDirectoryPath)
+	} catch (error) {
+		if (error.code === 'EEXIST') return
+		throw error
+	}
 }
