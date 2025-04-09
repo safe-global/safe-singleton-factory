@@ -158,7 +158,7 @@ class NewChainError extends Error {
 	static chainNotListed(chainId: string) {
 		return new NewChainError(
 			"Chain not listed",
-			`**⛔️ Error:**<br>Chain ${chainId} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).<br>`
+			`**⛔️ Error:**<br>Chain ${chainId} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).`
 		);
 	}
 
