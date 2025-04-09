@@ -17,11 +17,9 @@ jobs:
       - name: Run the validation script
         run: |
           RPC_URL=$(echo "$ISSUE_BODY" | grep -E -o 'https?://[^ ]+' -m 1 | head -1)
-          SUMMARY_FILE=summary.json RPC=$RPC_URL npm run verify:new-chain-request
-          RESPONSE=$(jq -r '.response' $SUMMARY_FILE)
-          echo "COMMENT_OUTPUT=$RESPONSE" >> $GITHUB_ENV
-          LABEL_OPERATION=$(jq -r '.labelOperation' $SUMMARY_FILE)
-          echo "LABEL_OPERATION=$LABEL_OPERATION" >> $GITHUB_ENV
+          SUMMARY_FILE=summary.json RPC=$RPC_URL npm run verify:new-chain-request || true
+          echo "COMMENT_OUTPUT=$(jq -r '.commentOutput' $SUMMARY_FILE)" >> $GITHUB_ENV
+          echo "LABEL_OPERATION=$(jq -r '.labelOperation' $SUMMARY_FILE)" >> $GITHUB_ENV
         env:
           ISSUE_BODY: ${{ env.ISSUE_BODY }}
           FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
