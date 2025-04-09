@@ -20,7 +20,9 @@ async function newChainWrapper() {
 		}
 	} catch (error) {
 		summary = {
-			commentOutput: (error instanceof NewChainError) ? error.comment : `Unknown Error: ${error}`,
+			commentOutput: (error instanceof NewChainError)
+				? error.comment
+				: `Unknown Error: ${error}`,
 			labelOperation: "--remove-label"
 		}
 	} finally {
@@ -101,11 +103,11 @@ async function verifyNewChainRequest() {
 			throw NewChainError.gasLimitEstimationFailed()
 		}
 
-		const gasEstimate = gasPrice.mul(gasLimit!).mul(15).div(10) // 15% buffer
+		const gasEstimate = gasPrice.mul(gasLimit!).mul(15).div(10) // 50% buffer
 		console.log({ gasPrice: gasPrice.toString(), gasLimit: gasLimit?.toString(), gasEstimate: gasEstimate.toString() })
 
 		// Get the deployed bytecode simulation
-		let simulation: string = '';
+		let simulation: string;
 		try {
 			simulation = await provider.call({
 				from: SIGNER,
