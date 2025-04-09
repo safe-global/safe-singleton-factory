@@ -15,22 +15,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run the validation script
+        env:
+          SUMMARY_FILE: summary.json
         run: |
           npm ci
-          RPC_URL=$(echo "$ISSUE_BODY" | grep -E -o 'https?://[^ ]+' -m 1 | head -1)
-          SUMMARY_FILE=summary.json RPC=$RPC_URL npm run verify:new-chain-request || true
-          echo "COMMENT_OUTPUT=$(jq -r '.commentOutput' summary.json)" >> $GITHUB_ENV
-          echo "LABEL_OPERATION=$(jq -r '.labelOperation' summary.json)" >> $GITHUB_ENV
-        env:
-          ISSUE_BODY: ${{ env.ISSUE_BODY }}
-          FACTORY_ADDRESS: ${{ env.FACTORY_ADDRESS }}
-          FACTORY_BYTECODE: ${{ env.FACTORY_BYTECODE }}
-          FACTORY_DEPLOYER_ADDRESS: ${{ env.FACTORY_DEPLOYER_ADDRESS }}
+          RPC="$(echo "$ISSUE_BODY" | grep -E -o 'https?://[^ ]+' -m 1 | head -1)" \
+            npm run verify:new-chain-request || true
+          echo "COMMENT_OUTPUT=$(jq -r '.commentOutput' $SUMMARY_FILE)" >> $GITHUB_ENV
+          echo "LABEL_OPERATION=$(jq -r '.labelOperation' $SUMMARY_FILE)" >> $GITHUB_ENV
 
       - name: Post Comment to the Issue
         if: always()
-        env:
-          COMMENT_OUTPUT: ${{ env.COMMENT_OUTPUT }}
         run: |
           gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT" --edit-last || gh issue comment "$NUMBER" --repo "$REPO" --body "$COMMENT_OUTPUT"
           gh issue edit "$NUMBER" --repo "$REPO" "$LABEL_OPERATION" ready-to-deploy

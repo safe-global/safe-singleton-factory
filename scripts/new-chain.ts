@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { ethers } from 'ethers'
+import { ethers, BigNumberish } from 'ethers'
 import dotenv from "dotenv";
 import { runScript } from './utils';
 import { ADDRESS, CODEHASH, FACTORY_BYTECODE, SIGNER } from './constants';
@@ -26,15 +26,15 @@ async function newChainWrapper() {
 		summary = {
 			commentOutput: (error instanceof NewChainError)
 				? error.comment
-				: `**⛔️ Error:**<br>Unexpected error verifying new chain.<br>Error Details: ${error}`,
+				: `**⛔️ Error:**<br>` +
+					`Unexpected error verifying new chain.<br>Error Details: ${error}`,
 			labelOperation: "--remove-label"
 		}
 	} finally {
+		console.log(summary);
 		const summaryFile = process.env.SUMMARY_FILE
 		if (summaryFile) {
 			fs.writeFileSync(summaryFile, JSON.stringify(summary, null, 2))
-		} else {
-			console.log(summary)
 		}
 	}
 }
@@ -108,7 +108,11 @@ async function verifyNewChainRequest() {
 		}
 
 		const gasEstimate = gasPrice.mul(gasLimit!).mul(15).div(10) // 50% buffer
-		console.log({ gasPrice: gasPrice.toString(), gasLimit: gasLimit?.toString(), gasEstimate: gasEstimate.toString() })
+		console.log({
+			gasPrice: gasPrice.toString(),
+			gasLimit: gasLimit?.toString(),
+			gasEstimate: gasEstimate.toString(),
+		})
 
 		// Get the deployed bytecode simulation
 		let simulation: string;
@@ -130,9 +134,9 @@ async function verifyNewChainRequest() {
 
 		// Check if the deployer account has enough balance
 		const balance = await provider.getBalance(SIGNER)
-		console.log({ balance: ethers.utils.formatEther(balance) })
+		console.log({ balance: balance.toString() })
 		if (balance.lt(gasEstimate)) {
-			throw NewChainError.prefundNeeded(gasEstimate.toString(), SIGNER)
+			throw NewChainError.prefundNeeded(gasEstimate, SIGNER)
 		}
 	}
 }
@@ -148,91 +152,106 @@ class NewChainError extends Error {
 	static rpcNotFound() {
 		return new NewChainError(
 			"RPC URL not found",
-			`**⛔️ Error:**<br>RPC URL not found in the issue body.`
+			`**⛔️ Error:**<br>` +
+				`RPC URL not found in the issue body.`
 		);
 	}
 
 	static factoryAlreadyDeployed() {
 		return new NewChainError(
 			"Factory already deployed",
-			`**⛔️ Error:**<br>The factory is already deployed.`
+			`**⛔️ Error:**<br>` +
+				`The factory is already deployed.`
 		);
 	}
 
 	static chainNotListed(chainId: string) {
 		return new NewChainError(
 			"Chain not listed",
-			`**⛔️ Error:**<br>Chain ${chainId} is not listed in the chainlist. For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).`
+			`**⛔️ Error:**<br>` +
+				`Chain ${chainId} is not listed in the chainlist.<br>` +
+				`For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).`
 		);
 	}
 
 	static factoryDifferentBytecode() {
 		return new NewChainError(
 			"Factory different bytecode",
-			`**⛔️ Error:**<br>Factory is deployed with different bytecode.`
+			`**⛔️ Error:**<br>` +
+				`Factory is deployed with different bytecode.`
 		);
 	}
 
 	static factoryPreDeployed() {
 		return new NewChainError(
 			"Factory pre-deployed",
-			`**⛔️ Error:**<br>Factory is pre-deployed on the chain.`
+			`**📝 Factory already deployed:**<br>` +
+				`Factory is pre-deployed on the chain. Please create a PR adding the artifact to the repository.<br>` +
+				`For more information, see instructions on how to do this in the [README](https://github.com/safe-global/safe-singleton-factory?tab=readme-ov-file#op-stack).`
 		);
 	}
 
 	static factoryNotAddedToRepo() {
 		return new NewChainError(
 			"Factory not added to repo",
-			`**⛔️ Error:**<br>Factory has been deployed but not added to the repository.`
+			`**📝 Factory already deployed:**<br>` +
+				`Factory exists on-chain but the artifact is missing from the repository. Please create a PR adding the artifact to the repository.`
 		);
 	}
 
 	static factoryDeployerAccountNonceBurned() {
 		return new NewChainError(
 			"Factory deployer account nonce burned",
-			`**⛔️ Error:**<br>Factory deployer account nonce burned.`
+			`**⛔️ Error:**<br>` +
+				`Factory deployer account nonce burned.`
 		);
 	}
 
 	static gasPriceNotRetrieved() {
 		return new NewChainError(
 			"Gas price not retrieved",
-			`**⛔️ Error:**<br>Gas price couldn't be retrieved. Please make sure that the RPC URL is valid and reachable.`
+			`**⛔️ Error:**<br>` +
+				`Gas price couldn't be retrieved. Please make sure that the RPC URL is valid and reachable.`
 		);
 	}
 
 	static gasLimitNotEstimated() {
 		return new NewChainError(
 			"Gas limit not estimated",
-			`**⛔️ Error:**<br>Gas limit couldn't be estimated. Please make sure that the RPC URL is valid and reachable.`
+			`**⛔️ Error:**<br>` +
+				`Gas limit couldn't be estimated. Please make sure that the RPC URL is valid and reachable.`
 		);
 	}
 
 	static gasLimitEstimationFailed() {
 		return new NewChainError(
 			"Gas limit estimation failed",
-			`**⛔️ Error:**<br>Gas limit estimation failed. Please make sure that the RPC URL is valid and reachable.`
+			`**⛔️ Error:**<br>` +
+				`Gas limit estimation failed. Please make sure that the RPC URL is valid and reachable.`
 		);
 	}
 
 	static deploymentSimulationFailed() {
 		return new NewChainError(
 			"Deployment simulation failed",
-			`**⛔️ Error:**<br>Deployment simulation failed. Please make sure that the RPC URL is valid and reachable.`
+			`**⛔️ Error:**<br>` +
+				`Deployment simulation failed. Please make sure that the RPC URL is valid and reachable.`
 		);
 	}
 
 	static factoryDeploymentSimulationDifferentBytecode() {
 		return new NewChainError(
 			"Factory deployment simulation different bytecode",
-			`**⛔️ Error:**<br>Factory deployment simulation returned different bytecode.`
+			`**⛔️ Error:**<br>` +
+				`Factory deployment simulation returned different bytecode.`
 		);
 	}
 
-	static prefundNeeded(amount: string, signer: string) {
+	static prefundNeeded(amount: BigNumberish, signer: string) {
 		return new NewChainError(
 			"Prefund needed",
-			`**💸 Pre-fund needed:**<br>We need a pre-fund to deploy the factory. Please send ${amount} wei to ${signer} and check the checkbox in the issue.`
+			`**💸 Pre-fund needed:**<br>` +
+				`We need a pre-fund to deploy the factory. Please send ${amount} wei to ${signer} and check the checkbox in the issue.`
 		);
 	}
 }
