@@ -63,12 +63,3 @@ export function arrayFromHexString(value: string): Uint8Array {
 	}
 	return new Uint8Array(bytes)
 }
-
-export async function ensureDirectoryExists(absoluteDirectoryPath: string) {
-	try {
-		await filesystem.mkdir(absoluteDirectoryPath)
-	} catch (error) {
-		if (error.code === 'EEXIST') return
-		throw error
-	}
-}
