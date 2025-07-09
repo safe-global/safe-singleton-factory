@@ -37,7 +37,7 @@ async function submitDeploymentTransaction() {
 		await simulateTransaction(transaction)
 	} catch (error) {
 		if (error.code === "UNSUPPORTED_OPERATION" && error.transactionType === 113) {
-			console.warn("WARN: simulation not supported on zkSync, skipping...")
+			console.warn("WARN: simulation not supported on legacy ZKsync, skipping...")
 		} else {
 			throw error
 		}

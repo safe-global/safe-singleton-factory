@@ -33,7 +33,7 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const bytecodeHash = utils.hashBytecode(factoryArtifact.bytecode);
   // The singleton factory does not have any constructor
   const constructor = "0x";
-  // We use create2 here as the address of this will be zkSync specific in any case. This way it also provides additional security.
+  // We use create2 here as the address of this will be ZKsync specific in any case. This way it also provides additional security.
   const iface = new ethers.utils.Interface([
     "function create2(bytes32 salt, bytes32 bytecodeHash, bytes constructor)"
   ]);
@@ -93,11 +93,11 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }
-  fs.writeFileSync(path.join(dir, "deployment.json"), JSON.stringify({ 
-    gasPrice: factoryTx.gasPrice.toNumber(), 
-    gasLimit: factoryTx.gasLimit.toNumber(), 
-    signerAddress: factoryTx.from, 
-    transaction: rawTx, 
+  fs.writeFileSync(path.join(dir, "deployment.json"), JSON.stringify({
+    gasPrice: factoryTx.gasPrice.toNumber(),
+    gasLimit: factoryTx.gasLimit.toNumber(),
+    signerAddress: factoryTx.from,
+    transaction: rawTx,
     address: contractAddress
   }, null, 4));
 }
