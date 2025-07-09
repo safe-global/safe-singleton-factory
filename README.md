@@ -4,7 +4,7 @@ Singleton factory used by Safe-related contracts based on https://github.com/Ara
 
 The original library used a pre-signed transaction without a chain ID to allow deployment on different chains. Some chains do not allow such transactions to be submitted (e.g. Celo and Avalanche); therefore, this repository will provide the same factory that can be deployed via a pre-signed transaction that includes the chain ID. The key that is used to sign is controlled by the Safe team.
 
-# User documentation
+# User Documentation
 
 ## Explanation (from Arachnid's repo)
 
@@ -12,11 +12,11 @@ This repository contains a simple contract that can deploy other contracts with 
 
 Between the use of CREATE2 opcode and the one-time-use account for the deployer, we can ensure that a given contract will exist at the exact same address on every chain, but without using the exact gas pricing or limits every time.
 
-## Encoding the deployment transaction
+## Encoding the Deployment Transaction
 
 The data should be the 32 byte 'salt' followed by the init code.
 
-## How to use for your projects
+## How to Use For Your Projects
 
 While the Safe singleton factory contract was deployed to help ensure that various Safe contracts have consistent addresses across many networks, it can be used in any project as an alternative to the [Arachnid `CREATE2` deployer contract](https://github.com/Arachnid/deterministic-deployment-proxy).
 
@@ -24,7 +24,7 @@ While the Safe singleton factory contract was deployed to help ensure that vario
 
 [`wilsoncusack/safe-singleton-deployer-sol`](https://github.com/wilsoncusack/safe-singleton-deployer-sol) is a library that facilitates the use of the Safe singleton factory contract for [Foundry](https://github.com/foundry-rs/foundry) projects. See the project for more detailed documentation.
 
-## How to get the singleton deployed to your network
+## How to Get the Singleton Deployed to Your Network
 
 As the singleton is deployed with an EIP155 transaction, we must sign the deployment transaction for your network. But some prerequisites must be met before that, and the most important one is having funds on the deployer so we can deploy the contract.
 
@@ -35,9 +35,9 @@ As the singleton is deployed with an EIP155 transaction, we must sign the deploy
 
 The Safe team will aim to respond to new network requests within two weeks.
 
-### OP Stack
+### OP Stack and ZKsync Networks
 
-OP Stack based networks include the Safe Singleton Factory as a pre-installed contract, meaning that there is no need to deploy it. Therefore, there is no need to create a signed deployment transaction for such networks. These networks can be added to this repository by submitting a PR adding a `deployment.json` with the following contents:
+OP Stack networks and ZKsync based networks with the [EVM bytecode interpreter](https://docs.zksync.io/zksync-era/unique-features/evm-interpreter/evm-interpreter) include the Safe Singleton Factory as a pre-installed contract, meaning that there is no need to deploy it. Therefore, there is no need to create a signed deployment transaction for such networks. These networks can be added to this repository by submitting a PR adding a `deployment.json` with the following contents:
 
 ```json
 {
@@ -55,11 +55,11 @@ For all networks, the same deployer key is used. The address for this key is `0x
 
 This results in the address for the factory being `0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7` for all bytecode-compatible EVM networks.
 
-For zkSync-based networks, the same deployer is used, and the expected factory address is `0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`, and the factory is deployed using the `create2` method of the system deployer using the zero hash (`0x0000000000000000000000000000000000000000000000000000000000000000`).
+For legacy ZKsync based networks without the EVM bytecode interpreter, the same deployer is used but the factory is deployed with EraVM bytecode, and the expected factory address is `0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`. The factory is deployed using the `create2` method of the system deployer using the zero hash (`0x0000000000000000000000000000000000000000000000000000000000000000`).
 
 List of deployments: [`0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7`](https://contractscan.xyz/contract/0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7) and [`0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD`](https://contractscan.xyz/contract/0xaECDbB0a3B1C6D1Fe1755866e330D82eC81fD4FD) (not maintained by the Safe team).
 
-## NPM Package release cycle
+## NPM Package Release Cycle
 
 The Safe team will aim to release a new version of the package every two weeks.
 
@@ -69,7 +69,7 @@ For example, see the [documentation](https://github.com/wighawag/hardhat-deploy/
 
 # Safe developers documentation
 
-## Adding new networks
+## Adding New Networks
 
 ### Using the `github-deploy` Tool
 
@@ -79,7 +79,7 @@ This repository contains a bash script [`bin/github-deploy.sh`](./bin/github-dep
 - Install [`op` 1Password CLI tool](https://1password.com/downloads/command-line/)
 - Run `bash bin/github-deploy.sh $NUMBER`
 
-**Note that this utility does not currently support zkSync-based network deployments**.
+**Note that this utility does not currently support legacy ZKsync based network deployments**.
 
 ### Manual Process
 
@@ -98,7 +98,7 @@ To submit a transaction after the deployment data is created:
 
 - Run `npm run submit`
 
-#### For zkSync-based networks
+#### For Legacy ZKsync Based Networks
 
 Use the same steps as above, but instead compile with:
 
@@ -113,7 +113,7 @@ This repository contains a bash script [`bin/github-review.sh`](./bin/github-rev
 - Install [`gh` GitHub CLI tool](https://cli.github.com/)
 - Run `bash bin/github-review.sh $NUMBER`
 
-**Note that this utility does not currently support zkSync-based network deployments**.
+**Note that this utility does not currently support legacy ZKsync based network deployments**.
 
 ### Manual Process
 
