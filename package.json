@@ -25,7 +25,8 @@
     "submit": "ts-node scripts/submit.ts",
     "estimate": "ts-node scripts/estimate.ts",
     "estimate-compile": "ts-node scripts/estimate-compile.ts",
-    "build": "rimraf dist && tsc",
+    "build": "prettier -c . && rimraf dist && tsc",
+    "fmt": "prettier -w .",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -53,10 +54,14 @@
     "dotenv": "^8.0.0",
     "ethers": "^5.7.0",
     "hardhat": "^2.12.0",
+    "prettier": "^3.6.2",
     "solc": "0.5.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
     "yargs": "^17.3.1",
     "zksync-web3": "^0.14.3"
+  },
+  "prettier": {
+    "useTabs": true
   }
 }

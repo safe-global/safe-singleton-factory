@@ -1,5 +1,5 @@
-declare module 'solc' {
-	import { Abi, Primitive } from 'ethereum';
+declare module "solc" {
+	import { Abi, Primitive } from "ethereum";
 
 	interface CompilerInputSourceFile {
 		keccak256?: string;
@@ -11,9 +11,9 @@ declare module 'solc' {
 	}
 	interface CompilerInput {
 		language: "Solidity" | "serpent" | "lll" | "assembly" | "Yul";
-		settings?: any,
+		settings?: any;
 		sources: {
-			[globalName: string]: CompilerInputSourceFile|CompilerInputSourceCode,
+			[globalName: string]: CompilerInputSourceFile | CompilerInputSourceCode;
 		};
 	}
 	interface CompilerOutputError {
@@ -32,18 +32,20 @@ declare module 'solc' {
 		object: string;
 		opcodes?: string;
 		sourceMap?: string;
-		linkReferences?: {} | {
-			[globalName: string]: {
-				[name: string]: {start: number, length: number}[];
-			};
-		};
+		linkReferences?:
+			| {}
+			| {
+					[globalName: string]: {
+						[name: string]: { start: number; length: number }[];
+					};
+			  };
 	}
 	interface CompilerOutputSources {
 		[globalName: string]: {
 			id: number;
 			ast: any;
 			legacyAST: any;
-		},
+		};
 	}
 	interface CompilerOutputContract {
 		abi: Abi;
@@ -76,19 +78,22 @@ declare module 'solc' {
 		ewasm?: {
 			wast: string;
 			wasm: string;
-		}
+		};
 	}
 	interface CompilerOutputContractFile {
-		[contractName: string]: CompilerOutputContract
+		[contractName: string]: CompilerOutputContract;
 	}
 	interface CompilerOutputContracts {
-		[globalName: string]: CompilerOutputContractFile
+		[globalName: string]: CompilerOutputContractFile;
 	}
 	interface CompilerOutput {
 		errors?: CompilerOutputError[];
 		sources?: CompilerOutputSources;
 		contracts: CompilerOutputContracts;
 	}
-	type ReadCallback = (path: string) => { contents?: string, error?: string};
-	function compileStandardWrapper(input: string, readCallback?: ReadCallback): string;
+	type ReadCallback = (path: string) => { contents?: string; error?: string };
+	function compileStandardWrapper(
+		input: string,
+		readCallback?: ReadCallback,
+	): string;
 }
