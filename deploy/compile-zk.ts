@@ -1,10 +1,9 @@
-import fs from "fs";
-import path from "path";
 import { utils, Wallet, Provider, EIP712Signer, types } from "zksync-web3";
 import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import dotenv from "dotenv";
+import { writeArtifact } from "../scripts/artifact"
 
 dotenv.config();
 
@@ -85,19 +84,11 @@ export default async function signDeployFactoryContractTX(hre: HardhatRuntimeEnv
   const rawTx = utils.serialize(factoryTx);
   const contractAddress = utils.create2Address(fromAddress, bytecodeHash, salt, constructor);
 
-  let dir = path.join(__dirname, "..", "artifacts");
-  if (!fs.existsSync(dir)){
-      fs.mkdirSync(dir);
-  }
-  dir = path.join(__dirname, "..", "artifacts", `${chainId}`);
-  if (!fs.existsSync(dir)){
-      fs.mkdirSync(dir);
-  }
-  fs.writeFileSync(path.join(dir, "deployment.json"), JSON.stringify({
+  await writeArtifact(`${chainId}`, {
     gasPrice: factoryTx.gasPrice.toNumber(),
     gasLimit: factoryTx.gasLimit.toNumber(),
     signerAddress: factoryTx.from,
     transaction: rawTx,
     address: contractAddress
-  }, null, 4));
+  });
 }

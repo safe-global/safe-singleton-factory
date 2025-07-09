@@ -1,19 +1,13 @@
 import { ethers } from 'ethers';
-import * as path from 'path'
-import { promises as filesystem } from 'fs'
 import { CompilerOutputContract } from 'solc'
-import { arrayFromHexString, compileContracts, ensureDirectoryExists } from './utils';
-import { SIGNER } from './constants';
+import { writeArtifact, writeBytecode } from './artifact'
+import { arrayFromHexString, compileContracts } from './utils'
+import { SIGNER } from './constants'
 
 export interface DeploymentEstimation {
 	chainId: number
 	gasLimit: ethers.BigNumber
 	gasPrice: ethers.BigNumber
-}
-
-async function writeBytecode(bytecode: string) {
-	const filePath = path.join(__dirname, '..', 'artifacts', `bytecode.txt`)
-	await filesystem.writeFile(filePath, bytecode, { encoding: 'utf8', flag: 'w' })
 }
 
 async function writeFactoryDeployerTransaction(contract: CompilerOutputContract, chainId: number, overwrites?: { gasPrice?: number, gasLimit?: number, nonce?: number}) {
@@ -34,16 +28,13 @@ async function writeFactoryDeployerTransaction(contract: CompilerOutputContract,
 	const signerAddress = await signer.getAddress()
 	const contractAddress = ethers.utils.getContractAddress({ from: signerAddress, nonce } )
 
-	const filePath = path.join(__dirname, "..", "artifacts", `${chainId}`, "deployment.json")
-	const fileContents = `{
-	"gasPrice": ${gasPrice},
-	"gasLimit": ${gasLimit},
-	"signerAddress": "${signerAddress}",
-	"transaction": "${signedEncodedTransaction}",
-	"address": "${contractAddress}"
-}
-`
-	await filesystem.writeFile(filePath, fileContents, { encoding: 'utf8', flag: 'w' })
+	await writeArtifact(`${chainId}`, {
+		gasPrice,
+		gasLimit,
+		signerAddress,
+		transaction: signedEncodedTransaction,
+		address: contractAddress,
+	})
 }
 
 export async function estimateDeploymentTransaction(rpcUrl: string): Promise<DeploymentEstimation> {
@@ -64,8 +55,6 @@ export async function estimateDeploymentTransaction(rpcUrl: string): Promise<Dep
 export async function createDeploymentTransaction(chainId: number, options?: { gasPrice?: number, gasLimit?: number, nonce?: number}) {
 	const compilerOutput = await compileContracts()
 	const contract = compilerOutput.contracts['deterministic-deployment-proxy.yul']['Proxy']
-	await ensureDirectoryExists(path.join(__dirname, '..', 'artifacts'))
-	await ensureDirectoryExists(path.join(__dirname, '..', 'artifacts', `${chainId}`))
 	await writeBytecode(contract.evm.bytecode.object)
 	await writeFactoryDeployerTransaction(contract, chainId, options)
 }
