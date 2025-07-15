@@ -12,7 +12,8 @@
 		"rootDirs": ["src", "scripts"],
 		"typeRoots": ["node_modules/@types", "scripts/typings"],
 		"esModuleInterop": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"skipLibCheck": true
 	},
 	"exclude": ["dist", "node_modules"],
 	"include": ["src"]

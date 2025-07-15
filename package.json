@@ -43,6 +43,8 @@
     "url": "https://github.com/safe-global/safe-singleton-factory/issues"
   },
   "devDependencies": {
+    "@ethersproject/hardware-wallets": "^5.8.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.29.8",
     "@matterlabs/hardhat-zksync-deploy": "^0.6.1",
     "@matterlabs/hardhat-zksync-solc": "^0.3.16",
     "@matterlabs/zksync-contracts": "^0.6.1",
