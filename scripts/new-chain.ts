@@ -157,7 +157,7 @@ async function fetchChainlist() {
 		const status = response.status;
 		const body = await response.text();
 		console.log({ status, body });
-		throw new Error("HTTP ${status} error retrieving chain list.");
+		throw new Error(`HTTP ${status} error retrieving chain list.`);
 	}
 
 	return (await response.json()) as Chainlist;
