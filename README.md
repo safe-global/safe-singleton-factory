@@ -76,7 +76,6 @@ For example, see the [documentation](https://github.com/wighawag/hardhat-deploy/
 This repository contains a bash script [`bin/github-deploy.sh`](./bin/github-deploy.sh) for automatically deploying the Safe singleton factory for a given GitHub issue `$NUMBER`:
 
 - Install [`gh` GitHub CLI tool](https://cli.github.com/)
-- Install [`op` 1Password CLI tool](https://1password.com/downloads/command-line/)
 - Run `bash bin/github-deploy.sh $NUMBER`
 
 **Note that this utility does not currently support legacy ZKsync based network deployments**.
