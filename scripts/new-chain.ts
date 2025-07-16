@@ -70,11 +70,11 @@ async function verifyNewChainRequest() {
 
 	// Check if the chain is listed in the chainlist
 	// If the chain is listed, we can proceed with the deployment
-	const chainlist = `https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/chains/eip155-${chainId}.json`;
-	const { ok: onChainlist } = await fetch(chainlist);
-	console.log({ chainlist, onChainlist });
+	const chainlist = await fetchChainlist();
+	const onChainlist = chainlist.some((item) => item.chainId === chainId);
+	console.log({ onChainlist });
 	if (!onChainlist) {
-		throw NewChainError.chainNotListed(chainId.toString());
+		throw NewChainError.chainNotListed(chainId);
 	}
 
 	const nonce = await provider.getTransactionCount(SIGNER);
@@ -149,6 +149,20 @@ async function verifyNewChainRequest() {
 	}
 }
 
+type Chainlist = { chainId: number }[];
+
+async function fetchChainlist() {
+	const response = await fetch("https://chainlist.org/rpcs.json");
+	if (!response.ok) {
+		const status = response.status;
+		const body = await response.text();
+		console.log({ status, body });
+		throw new Error("HTTP ${status} error retrieving chain list.");
+	}
+
+	return (await response.json()) as Chainlist;
+}
+
 class NewChainError extends Error {
 	public comment: string;
 	private constructor(message: string, comment: string) {
@@ -171,12 +185,12 @@ class NewChainError extends Error {
 		);
 	}
 
-	static chainNotListed(chainId: string) {
+	static chainNotListed(chainId: BigNumberish) {
 		return new NewChainError(
 			"Chain not listed",
 			`**⛔️ Error:**<br>` +
 				`Chain ${chainId} is not listed in the chainlist.<br>` +
-				`For more information on how to add a chain, please refer to the [chainlist repository](https://github.com/ethereum-lists/chains).`,
+				`For more information on how to add a chain, please refer to the [chainlist documentation](https://github.com/DefiLlama/chainlist?tab=readme-ov-file#add-a-chain).`,
 		);
 	}
 
