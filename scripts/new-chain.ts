@@ -192,7 +192,7 @@ class NewChainError extends Error {
 			"Factory pre-deployed",
 			`**📝 Factory already deployed:**<br>` +
 				`Factory is pre-deployed on the chain. Please create a PR adding the artifact to the repository.<br>` +
-				`For more information, see instructions on how to do this in the [README](https://github.com/safe-global/safe-singleton-factory?tab=readme-ov-file#op-stack).`,
+				`For more information, see instructions on how to do this in the [README](https://github.com/safe-global/safe-singleton-factory?tab=readme-ov-file#op-stack-and-zksync-networks).`,
 		);
 	}
 
