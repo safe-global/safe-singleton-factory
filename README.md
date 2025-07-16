@@ -86,7 +86,6 @@ This repository contains a bash script [`bin/github-deploy.sh`](./bin/github-dep
 Optionally, deployment may be done by manual configuration and execution of NPM scripts. To generate the deployment data for a new network, the following steps are necessary:
 
 - Set `RPC` in the `.env` file for the new network.
-- Set `MNEMONIC` in the `.env` file.
 - Estimate transaction params via `npm run estimate`
 - Run `npm run compile <chain_id> [--gasPrice <overwrite_gas_price>] [--gasLimit <overwrite_gas_limit>]`
 

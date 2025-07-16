@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
 import { CompilerOutputContract } from "solc";
 import { writeArtifact, writeBytecode } from "./artifact";
-import { arrayFromHexString, compileContracts } from "./utils";
 import { SIGNER } from "./constants";
+import { getSigner } from "./signer";
+import { arrayFromHexString, compileContracts } from "./utils";
 
 export interface DeploymentEstimation {
 	chainId: number;
@@ -20,13 +21,13 @@ async function writeFactoryDeployerTransaction(
 	const nonce = overwrites?.nonce || 0;
 	const gasPrice =
 		overwrites?.gasPrice != undefined ? overwrites.gasPrice : 100 * 10 ** 9;
-	// actual gas costs last measure: 59159; we don't want to run too close though because gas costs can change in forks and we want our address to be retained
+	// actual gas costs last measure: 59159; we don't want to run too close though because gas costs
+	// can change in forks and we want our address to be retained
 	const gasLimit = overwrites?.gasLimit || 100000;
 	const value = 0;
 	const data = arrayFromHexString(deploymentBytecode);
 
-	if (!process.env.MNEMONIC) throw Error("MNEMONIC is required");
-	const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC!!);
+	const signer = getSigner();
 	const signedEncodedTransaction = await signer.signTransaction({
 		nonce,
 		gasPrice,

@@ -4,30 +4,27 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import dotenv from "dotenv";
 import { writeArtifact } from "../scripts/artifact";
+import { getSigner } from "../scripts/signer";
 
 dotenv.config();
 
 export default async function signDeployFactoryContractTX(
 	hre: HardhatRuntimeEnvironment,
 ) {
-	const { RPC, MNEMONIC, PK, ZK_PAYMASTER_ADDRESS } = process.env;
+	const { RPC, ZK_PAYMASTER_ADDRESS } = process.env;
 
 	if (!RPC) {
 		throw new Error("Missing RPC environment variable");
 	}
 	const provider = new Provider(RPC);
-	let wallet: Wallet;
-	if (PK) {
-		wallet = new Wallet(PK).connect(provider);
-	} else if (MNEMONIC) {
-		wallet = Wallet.fromMnemonic(MNEMONIC).connect(provider);
-	} else {
-		throw new Error("Either PK or MNEMONIC environment variable must be set");
-	}
+	const signer = getSigner();
 
-	const fromAddress = wallet.address;
+	const fromAddress = await signer.getAddress();
 
-	const deployer = new Deployer(hre, wallet);
+	// The `Deployer` API _needs_ a `zksync-web3::Wallet` instance, even if we don't actually use it
+	// for anything other than reading an artifact JSON blob. Create a random one so we can use the
+	// API, since our actual signer created by `getSigner` is not sufficient.
+	const deployer = new Deployer(hre, Wallet.createRandom());
 	const factoryArtifact = await deployer.loadArtifact("SafeSingeltonFactory");
 
 	const salt = ethers.constants.HashZero;
@@ -44,7 +41,7 @@ export default async function signDeployFactoryContractTX(
 		constructor,
 	]);
 
-	const chainId = (await provider.getNetwork()).chainId;
+	const { chainId } = await provider.getNetwork();
 	const nonce = await provider.getTransactionCount(fromAddress);
 
 	const customData = {
@@ -81,10 +78,7 @@ export default async function signDeployFactoryContractTX(
 		gasPrice: gasPrice.mul(2),
 	};
 
-	const signedTxHash = EIP712Signer.getSignedDigest(factoryTx);
-	const signature = ethers.utils.arrayify(
-		ethers.utils.joinSignature(wallet._signingKey().signDigest(signedTxHash)),
-	);
+	const signature = await new EIP712Signer(signer, chainId).sign(factoryTx);
 	factoryTx.customData = {
 		...factoryTx.customData,
 		customSignature: signature,

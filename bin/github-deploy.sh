@@ -10,8 +10,7 @@ Deploy a Safe singleton factory to a new network.
 
 This tool wraps the NPM scripts 'estimate-compile' and 'submit' and:
 1. Parses the RPC URL from a GitHub issue
-2. Fetches the deployer mnemonic from 1Password
-3. Automatically creates the GitHub PR for adding the deployment
+2. Automatically creates the GitHub PR for adding the deployment
 
 USAGE
     github-deploy.sh [ISSUE]
@@ -46,10 +45,6 @@ if ! command -v gh &> /dev/null; then
     echo "ERROR: Please install the 'gh' GitHub CLI" 1>&2
     exit 1
 fi
-if ! command -v op &> /dev/null; then
-    echo "ERROR: Please install the 'op' 1Password CLI" 1>&2
-    exit 1
-fi
 
 issue=0
 case $# in
@@ -76,8 +71,7 @@ rpc="$(gh issue view $issue | grep -E -o 'https?://[^ ]+' -m 1 | head -1)"
 echo "=> $rpc"
 
 echo "### Building Deployment Transaction"
-mnemonic="$(op item get "$itemuid" --field password --reveal)"
-MNEMONIC="$mnemonic" RPC="$rpc" npm run -s estimate-compile
+RPC="$rpc" npm run -s estimate-compile
 commit=1
 if [[ -n "$(git status --untracked-files=no --porcelain -- artifacts/)" ]]; then
     echo "WARN: Modified an existing deployment" 1>&2
