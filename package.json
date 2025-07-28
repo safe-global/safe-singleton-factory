@@ -27,7 +27,7 @@
     "estimate-compile": "ts-node scripts/estimate-compile.ts",
     "build": "prettier -c . && tsc -p tsconfig.dev.json && rimraf dist && tsc",
     "fmt": "prettier -w .",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
