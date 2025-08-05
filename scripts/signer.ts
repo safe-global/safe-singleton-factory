@@ -49,8 +49,10 @@ class LedgerTypedDataSigner extends LedgerSigner {
 		if (tx.chainId) {
 			// `v` is `(chainId * 2 + 35 + yParity) % 256`, so regardless of the value of `chainId`,
 			// `chainId * 2 + 35` will always be odd, and therefore, `yParity` will be the opposite
-			// of the least significant bit.
-			const yParity = (v & 1) ^ 1;
+			// of the least significant bit. Note that the Ledger API returns the `v` as a
+			// hexadecimal-encoded string, so make sure to parse it or you get unexpected behaviour
+			// with the bitwise operations.
+			const yParity = (parseInt(v, 16) & 1) ^ 1;
 			correctedV = ethers.BigNumber.from(tx.chainId)
 				.mul(2)
 				.add(35)
