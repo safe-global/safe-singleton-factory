@@ -17,3 +17,12 @@ jobs:
       - run: |
           npm ci
           npm run build
+      - name: Run nodes
+        env:
+          RPC: http://localhost:8545
+        run: |
+          ./bin/revive-dev-node --dev & ./bin/eth-rpc --dev &
+
+          sleep 10
+
+          npm run estimate
