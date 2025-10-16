@@ -49,7 +49,11 @@ fi
 issue=0
 case $# in
     0)
-        gh issue list --label ready-to-deploy --json number,title --jq '.[] | "• #\(.number): \(.title)"'
+        gh issue list --label ready-to-deploy \
+            --json number,title,closedByPullRequestsReferences \
+            --jq '.[]
+                  | .pr = (.closedByPullRequestsReferences.[0].number | if (.) then " {✓ #\(.)}" else "" end)
+                  | "• #\(.number): \(.title)\(.pr)"'
         exit 0
         ;;
     1)
