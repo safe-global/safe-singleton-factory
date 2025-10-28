@@ -1,8 +1,8 @@
 {
-  "name": "@safe-global/safe-singleton-factory",
+  "name": "@safe-fndn/safe-singleton-factory",
   "version": "2.0.0",
   "description": "Singleton factory used by Safe related contracts",
-  "homepage": "https://github.com/safe-global/safe-singleton-factory/",
+  "homepage": "https://github.com/safe-fndn/safe-singleton-factory/",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/safe-global/safe-singleton-factory.git"
+    "url": "git+https://github.com/safe-fndn/safe-singleton-factory.git"
   },
   "keywords": [
     "Ethereum",
@@ -40,7 +40,7 @@
   ],
   "author": "richard@safe.global",
   "bugs": {
-    "url": "https://github.com/safe-global/safe-singleton-factory/issues"
+    "url": "https://github.com/safe-fndn/safe-singleton-factory/issues"
   },
   "devDependencies": {
     "@ethersproject/hardware-wallets": "^5.8.0",

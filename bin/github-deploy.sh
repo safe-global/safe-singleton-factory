@@ -101,7 +101,7 @@ EOF
 )"
 if [[ $commit -eq 1 ]]; then
     git push --set-upstream origin "$issue-github-deployment"
-    gh pr create --fill --reviewer safe-global/safe-protocol
+    gh pr create --fill --reviewer safe-fndn/contracts
     git checkout main
     git branch -D "$issue-github-deployment"
 else
