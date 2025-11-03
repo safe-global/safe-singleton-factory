@@ -8,6 +8,10 @@ env:
   NUMBER: ${{ github.event.issue.number }}
   REPO: ${{ github.repository }}
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   prepareTransaction:
     if: ${{ contains(github.event.issue.labels.*.name, 'new-chain') }}
